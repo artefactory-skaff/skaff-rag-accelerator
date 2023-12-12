@@ -1,3 +1,8 @@
--e .
-pandas==1.5.3
-numpy==1.24.2
+gcsfs
+s3fs
+adlfs
+universal_pathlib
+chromadb
+langchain
+langchainhub
+gpt4all
