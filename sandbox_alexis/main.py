@@ -13,6 +13,6 @@ It may seem as if there are a lot of different situations with superlinear retur
 Even after decades of thinking about this, I find that sentence startling."""
 
 split_documents = load_and_split_document(text=data)
-root_path = get_storage_root_path("", StorageBackend.GCS)
+root_path = get_storage_root_path("dbt-server-alexis3-36fe-rag", StorageBackend.GCS)
 vector_store = Chroma(persist_directory=str(root_path / "chromadb"), embedding_function=GPT4AllEmbeddings())
 db = vector_store.add_documents(split_documents)
