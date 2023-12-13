@@ -24,11 +24,11 @@ def persist_to_bucket(bucket_path: str, store: Chroma):
 
 
 def store_documents(docs: List[Document], bucket_path: str, storage_backend: StorageBackend):
-    lagnchain_documents = [doc.to_langchain_document() for doc in docs]
+    langchain_documents = [doc.to_langchain_document() for doc in docs]
     embeddings_model = OpenAIEmbeddings()
     persistent_client = chromadb.PersistentClient()
     collection = persistent_client.get_or_create_collection(get_storage_root_path(bucket_path, storage_backend))
-    collection.add(documents=lagnchain_documents)
+    collection.add(documents=langchain_documents)
     langchain_chroma = Chroma(
         client=persistent_client,
         collection_name=bucket_path,

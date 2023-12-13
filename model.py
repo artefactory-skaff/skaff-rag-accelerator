@@ -3,6 +3,7 @@ from langchain.docstore.document import Document
 
 class ChatMessage(BaseModel):
     message: str
+    message_id: str
     session_id: str
 
 class Doc(BaseModel):

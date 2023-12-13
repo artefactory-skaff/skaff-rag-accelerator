@@ -6,3 +6,5 @@ chromadb
 langchain
 langchainhub
 gpt4all
+python-multipart
+httpx
