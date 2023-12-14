@@ -1,9 +1,11 @@
 from datetime import timedelta
 from typing import List
+from uuid import uuid4
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
+from database.database import Database
 
 import document_store
 from user_management import (authenticate_user, create_access_token, create_user, 
@@ -103,6 +105,10 @@ async def chat_new(current_user: User = Depends(get_current_user)):
 async def chat_prompt(current_user: User = Depends(get_current_user)):
     pass
 
+@app.post("/chat/regenerate")
+async def chat_regenerate(current_user: User = Depends(get_current_user)):
+    pass
+
 @app.get("/chat/list")
 async def chat_list(current_user: User = Depends(get_current_user)):
     pass
@@ -116,17 +122,15 @@ async def chat(chat_id: str, current_user: User = Depends(get_current_user)):
 ###               Feedback               ###
 ############################################
 
-@app.post("/feedback/thumbs_up")
-async def feedback_thumbs_up(current_user: User = Depends(get_current_user)):
-    pass
+@app.post("/feedback/{message_id}/thumbs_up")
+async def feedback_thumbs_up(message_id, current_user: User = Depends(get_current_user)):
+    with Database() as connection:
+        connection.query("INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)", (str(uuid4()), message_id, "thumbs_up"))
 
-@app.post("/feedback/thumbs_down")
-async def feedback_thumbs_down(current_user: User = Depends(get_current_user)):
-    pass
-
-@app.post("/feedback/regenerate")
-async def feedback_regenerate(current_user: User = Depends(get_current_user)):
-    pass
+@app.post("/feedback/{message_id}/thumbs_down")
+async def feedback_thumbs_down(message_id, current_user: User = Depends(get_current_user)):
+    with Database() as connection:
+        connection.query("INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)", (str(uuid4()), message_id, "thumbs_down"))
 
 
 ############################################
