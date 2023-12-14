@@ -16,13 +16,22 @@ class User(BaseModel):
 def create_user(user: User):
     with Database() as connection:
         connection.query("INSERT INTO user (email, password) VALUES (?, ?)", (user.email, user.password))
-    
+
+def user_exists(email: str) -> bool:
+    with Database() as connection:
+        result = connection.query("SELECT 1 FROM user WHERE email = ?", (email,))[0]
+        return bool(result)
+
 def get_user(email: str):
     with Database() as connection:
         user_row = connection.query("SELECT * FROM user WHERE email = ?", (email,))[0]
         for row in user_row:
             return User(**row)
         raise Exception("User not found")
+    
+def delete_user(email: str):
+    with Database() as connection:
+        connection.query("DELETE FROM user WHERE email = ?", (email,))
 
 def authenticate_user(username: str, password: str):
     user = get_user(username)

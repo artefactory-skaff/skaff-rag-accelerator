@@ -6,8 +6,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 
 import document_store
-from authentication import (authenticate_user, create_access_token, create_user, 
-                            get_user, User, SECRET_KEY, ALGORITHM)
+from user_management import (authenticate_user, create_access_token, create_user, 
+                            get_user, User, SECRET_KEY, ALGORITHM, user_exists)
 from document_store import StorageBackend
 from model import Doc
 
@@ -41,15 +41,34 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 
 @app.post("/user/signup")
 async def signup(user: User):
-    try:
-        user = get_user(user.email)
+    if user_exists(user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"User {user.email} already registered"
         )
-    except Exception as e:
-        create_user(user)
+    
+    create_user(user)
     return {"email": user.email}
+
+
+@app.delete("/user/")
+async def delete_user(current_user: User = Depends(get_current_user)):
+    email = current_user.email
+    try:
+        user = get_user(email)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User {email} not found"
+            )
+        delete_user(email)
+        return {"detail": f"User {email} deleted"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal Server Error"
+        )
+
 
 @app.post("/user/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
