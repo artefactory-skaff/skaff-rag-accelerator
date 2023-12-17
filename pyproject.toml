@@ -1,0 +1,87 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scraping-hello-bank"
+authors = [
+  { name = "sarah-lauzeral", email = "sarah.lauzeral@artefact.com" },
+] # TODO: Add more authors if collaborators are added
+description = "scraping-hello-bank"
+version = "0.0.1"
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.urls]
+"Homepage" = "https://github.com/artefactory-fr/scraping-hello-bank"
+"Documentation" = "https://artefactory-fr.github.io/scraping-hello-bank"
+
+[tool.setuptools]
+packages = ["lib", "config", "tests"]
+
+[tool.ruff]
+select = [
+  "E",
+  "W",
+  "F",
+  "I",
+  "N",
+  "D",
+  "ANN",
+  "Q",
+  "RET",
+  "ARG",
+  "PTH",
+  "PD",
+] # See: https://beta.ruff.rs/docs/rules/
+ignore = ["D100", "D203", "D213", "ANN101", "ANN102"]
+line-length = 100
+target-version = "py310"
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+# https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.direnv
+    | \.eggs
+    | \.git
+    | \.tox
+    | \.venv
+    | _build
+    | build
+    | dist
+    | venv
+  )/
+)
+'''
+
+[tool.isort]
+profile = "black"
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests"]
+skips = ["B101"]
