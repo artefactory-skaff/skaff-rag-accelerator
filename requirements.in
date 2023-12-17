@@ -31,3 +31,4 @@ httpx
 pytest
 python-jose
 trubrics[streamlit]
+uvicorn

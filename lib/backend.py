@@ -1,4 +1,4 @@
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import streamlit as st
 from langchain.chat_models import AzureChatOpenAI
@@ -100,7 +100,7 @@ def get_vector_store(_texts: List[str], _embeddings: OpenAIEmbeddings) -> Chroma
 
 
 def choose_memory_type(
-    memory_type: str, llm: AzureChatOpenAI
+    memory_type: str, llm: Optional[AzureChatOpenAI]
 ) -> Tuple[
     StreamlitChatMessageHistory,
     Union[
@@ -112,19 +112,19 @@ def choose_memory_type(
 ]:
     """Chooses the memory type for the conversation based on the provided memory_type string."""
     msgs = StreamlitChatMessageHistory(key="special_app_key")
-    if memory_type == "":
+    if memory_type == "buffer":
         memory = ConversationBufferMemory(
             memory_key="chat_history", chat_memory=msgs, return_messages=True
         )
-    elif memory_type == "":
+    elif memory_type == "buffer_window":
         memory = ConversationBufferWindowMemory(
             k=2, memory_key="chat_history", chat_memory=msgs, return_messages=True
         )
-    elif memory_type == "":
+    elif memory_type == "summary":
         memory = ConversationSummaryMemory(
             llm=llm, memory_key="chat_history", chat_memory=msgs, return_messages=True
         )
-    elif memory_type == "":
+    elif memory_type == "summary_buffer":
         memory = ConversationSummaryBufferMemory(
             llm=llm,
             max_token_limit=100,

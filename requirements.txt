@@ -575,7 +575,9 @@ urllib3==2.0.7
     #   requests
     #   types-requests
 uvicorn[standard]==0.24.0.post1
-    # via chromadb
+    # via
+    #   -r requirements.in
+    #   chromadb
 uvloop==0.19.0
     # via uvicorn
 validators==0.22.0

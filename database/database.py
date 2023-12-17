@@ -20,7 +20,9 @@ class Database:
         self.conn.row_factory = sqlite3.Row
         return self
 
-    def __exit__(self, exc_type: Optional[type]) -> None:
+    def __exit__(
+        self, exc_type: Optional[type], exc_val: Optional[type], exc_tb: Optional[type]
+    ) -> None:
         """Exit the runtime context and close the database connection properly."""
         if exc_type is not None:
             self.conn.rollback()

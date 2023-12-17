@@ -1,13 +1,25 @@
-import json
-from typing import List
+from typing import List, Optional, Tuple, Union
 
 import pandas as pd
 import streamlit as st
 from langchain.chains import ConversationalRetrievalChain, LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chat_models import AzureChatOpenAI
+from langchain.document_loaders import (
+    CSVLoader,
+    Docx2txtLoader,
+    PyPDFLoader,
+    UnstructuredExcelLoader,
+    UnstructuredPowerPointLoader,
+)
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.memory import ConversationBufferMemory
+from langchain.memory import (
+    ConversationBufferMemory,
+    ConversationBufferWindowMemory,
+    ConversationSummaryBufferMemory,
+    ConversationSummaryMemory,
+)
+from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -15,8 +27,13 @@ from langchain.prompts import (
 )
 from langchain.schema.document import Document
 from langchain.schema.messages import HumanMessage, SystemMessage
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import (
+    CharacterTextSplitter,
+    RecursiveCharacterTextSplitter,
+)
 from langchain.vectorstores import Chroma
+
+from interface.lib.logs import StreamHandler
 
 
 @st.cache_resource
@@ -47,7 +64,7 @@ def get_llm(
 def get_embeddings_model(embedding_api_base: str, embedding_api_key: str) -> OpenAIEmbeddings:
     """Returns an instance of OpenAIEmbeddings based on the provided parameters."""
     return OpenAIEmbeddings(
-        deployment="text-embedding-ada-002",
+        deployment="embeddings",
         openai_api_type="azure",
         openai_api_base=embedding_api_base,
         openai_api_key=embedding_api_key,
@@ -68,49 +85,39 @@ def get_documents(data: pd.DataFrame) -> List[Document]:
 
 
 @st.cache_data
-def load_documents(source: str) -> List[Document]:
-    """Loads documents from two CSV files and returns a combined list of these documents."""
-    if source == "faq":
-        data_faq = pd.read_csv(
-            "../interface/assets/scraping_faq.csv", delimiter="\t", encoding="utf-8-sig"
-        )
-        documents = get_documents(data_faq)
+def load_documents(file_extension: str, file_path: str):
+    """Loads documents based on the file extension and path provided."""
+    if file_extension == ".pdf":
+        loader = PyPDFLoader(file_path)
+    elif file_extension in [".csv"]:
+        loader = CSVLoader(file_path, encoding="utf-8-sig", csv_args={"delimiter": "\t"})
+    elif file_extension in [".xlsx"]:
+        loader = UnstructuredExcelLoader(file_path, mode="elements")
+    elif file_extension in [".pptx"]:
+        loader = UnstructuredPowerPointLoader(file_path)
+    elif file_extension in [".docx"]:
+        loader = Docx2txtLoader(file_path)
+    else:
+        st.error("Unsupported file type!")
 
-    elif source == "site":
-        data_site = pd.read_csv(
-            "interface/assets/scraping_site.csv", delimiter="\t", encoding="utf-8-sig"
-        )  # ../interface/assets/scraping_site.csv
-        data_site["question"] = (
-            data_site["source"].str.rsplit("/", n=2).str[-2].str.replace("-", " ")
-        )
-        data_site = data_site.rename(columns={"description": "answer"})
-        documents = get_documents(data_site)
-
-    elif source == "both":
-        data_faq = pd.read_csv(
-            "../interface/assets/scraping_faq.csv", delimiter="\t", encoding="utf-8-sig"
-        )
-        documents_faq = get_documents(data_faq)
-
-        data_site = pd.read_csv(
-            "../interface/assets/scraping_site.csv", delimiter="\t", encoding="utf-8-sig"
-        )
-        data_site["question"] = (
-            data_site["source"].str.rsplit("/", n=2).str[-2].str.replace("-", " ")
-        )
-        data_site = data_site.rename(columns={"description": "answer"})
-        documents_site = get_documents(data_site)
-        documents = documents_faq + documents_site
-
-    return documents
+    return loader.load()
 
 
 @st.cache_data
-def get_chunks(_documents: List[str], chunk_size: int, chunk_overlap: int) -> List[str]:
+def get_chunks(
+    _documents: List[str], chunk_size: int, chunk_overlap: int, text_splitter_type: int
+) -> List[str]:
     """Splits the documents into chunks."""
-    text_splitter = RecursiveCharacterTextSplitter(
-        separators=["\n\n", "\n", " "], chunk_size=chunk_size, chunk_overlap=chunk_overlap
-    )
+    if text_splitter_type == "basic":
+        text_splitter = CharacterTextSplitter(
+            separator="\n\n",
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+        )
+    elif text_splitter_type == "recursive":
+        text_splitter = RecursiveCharacterTextSplitter(
+            separators=["\n\n", "\n", " "], chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
     return text_splitter.split_documents(_documents)
 
 
@@ -118,6 +125,43 @@ def get_chunks(_documents: List[str], chunk_size: int, chunk_overlap: int) -> Li
 def get_vector_store(_texts: List[str], _embeddings: OpenAIEmbeddings) -> Chroma:
     """Returns an instance of Chroma based on the provided parameters."""
     return Chroma.from_documents(_texts, _embeddings)
+
+
+@st.cache_data
+def choose_memory_type(
+    memory_type: str, _llm: Optional[AzureChatOpenAI] = None
+) -> Tuple[
+    StreamlitChatMessageHistory,
+    Union[
+        ConversationBufferMemory,
+        ConversationBufferWindowMemory,
+        ConversationSummaryMemory,
+        ConversationSummaryBufferMemory,
+    ],
+]:
+    """Chooses the memory type for the conversation based on the provided memory_type string."""
+    msgs = StreamlitChatMessageHistory(key="special_app_key")
+    if memory_type == "buffer":
+        memory = ConversationBufferMemory(
+            memory_key="chat_history", chat_memory=msgs, return_messages=True
+        )
+    elif memory_type == "buffer_window":
+        memory = ConversationBufferWindowMemory(
+            k=2, memory_key="chat_history", chat_memory=msgs, return_messages=True
+        )
+    elif memory_type == "summary":
+        memory = ConversationSummaryMemory(
+            llm=_llm, memory_key="chat_history", chat_memory=msgs, return_messages=True
+        )
+    elif memory_type == "summary_buffer":
+        memory = ConversationSummaryBufferMemory(
+            llm=_llm,
+            max_token_limit=100,
+            memory_key="chat_history",
+            chat_memory=msgs,
+            return_messages=True,
+        )
+    return msgs, memory
 
 
 def get_answer_chain(
@@ -143,31 +187,17 @@ Question reformulée :
     messages = [
         SystemMessage(
             content=(
-                """En tant qu'assistant bancaire nommé Helloïz, spécialisé dans les
-services de la banque en ligne Hello Bank, votre mission est de répondre de manière \
-précise et concise aux interrogations des utilisateurs.
+                """En tant qu'assistant chatbot, votre mission est de répondre de manière \
+précise et concise aux interrogations des utilisateurs à partir des documents donnés en input.
 Il est essentiel de répondre dans la même langue que celle utilisée pour poser la question.
 Les réponses doivent être rédigées dans un style professionnel et doivent faire preuve \
 d'une grande attention aux détails.
-Pour répondre à chaque question, veuillez structurer votre réponse sous la forme \
-d'un objet JSON avec les clés suivantes :
-- 'answer': Fournissez une réponse claire, précise et excacte à la question.
-- 'source': Enumérez le contenu spécifique du document que vous avez utilisé pour formuler \
-votre réponse.
-
-Exemple :
-{
-"answer": "Si vous ne parvenez pas à effectuer un virement unitaire ou permanent, \
-nous vous invitons à contacter la Hello Team.",
-"source":  ["https://www.hellobank.fr/faq/mon-virement-a-ete-bloque-que-faire.html"]
-}
 """
             )
         ),
         HumanMessage(content="Répondez à la question en prenant en compte le contexte suivant"),
         HumanMessagePromptTemplate.from_template("{context}"),
         HumanMessagePromptTemplate.from_template("Question: {question}"),
-        HumanMessage(content="Tips: Make sure to answer in the specific JSON format requested."),
     ]
     system_prompt = ChatPromptTemplate(messages=messages)
     qa_chain = LLMChain(
@@ -195,27 +225,7 @@ nous vous invitons à contacter la Hello Team.",
     )
 
 
-def format_chatbot_answer(response_msg: str) -> str:
-    """Formats the chatbot's answer from a JSON string to a more readable string format."""
-    response = response_msg.replace("\n\n", "\\n")
-    json_response = json.loads(response)
-    answer = json_response["answer"]
-    source = json_response["source"]
-    chatbot_answer = f"{answer}\n\n"
-    for ref in source:
-        add_ref = f"Pour en savoir plus, vous pouvez consulter la page suivante: {ref} \n\n"
-        chatbot_answer += add_ref
-    return chatbot_answer
-
-
 def get_response(answer_chain: ConversationalRetrievalChain, query: str) -> str:
     """Processes the given query through the answer chain and returns the formatted response."""
-    response = answer_chain.run(query)
-    return format_chatbot_answer(response)
-
-
-def format_history_msg(msg_content: str) -> str:
-    """Formats the history message content."""
-    if msg_content.startswith("{"):
-        return format_chatbot_answer(msg_content)
-    return msg_content
+    stream_handler = StreamHandler(st.empty())
+    return answer_chain.run(query, callbacks=[stream_handler])
