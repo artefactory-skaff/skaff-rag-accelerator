@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from database.database import Database
-from main import app
+from lib.main import app
 
 os.environ["TESTING"] = "True"
 client = TestClient(app)

@@ -6,11 +6,11 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
-import document_store
+import lib.document_store as document_store
 from database.database import Database
-from document_store import StorageBackend
-from model import Doc
-from user_management import (
+from lib.document_store import StorageBackend
+from lib.model import Doc
+from lib.user_management import (
     ALGORITHM,
     SECRET_KEY,
     User,

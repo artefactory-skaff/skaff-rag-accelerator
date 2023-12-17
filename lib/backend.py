@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple, Union
 
 import streamlit as st
 from langchain.chat_models import AzureChatOpenAI
@@ -11,6 +11,13 @@ from langchain.document_loaders import (
     UnstructuredPowerPointLoader,
 )
 from langchain.embeddings import OpenAIEmbeddings
+from langchain.memory import (
+    ConversationBufferMemory,
+    ConversationBufferWindowMemory,
+    ConversationSummaryBufferMemory,
+    ConversationSummaryMemory,
+)
+from langchain.memory.chat_message_histories import StreamlitChatMessageHistory
 from langchain.text_splitter import (
     CharacterTextSplitter,
     RecursiveCharacterTextSplitter,
@@ -90,3 +97,39 @@ def get_chunks(
 def get_vector_store(_texts: List[str], _embeddings: OpenAIEmbeddings) -> Chroma:
     """Returns an instance of Chroma based on the provided parameters."""
     return Chroma.from_documents(_texts, _embeddings)
+
+
+def choose_memory_type(
+    memory_type: str, llm: AzureChatOpenAI
+) -> Tuple[
+    StreamlitChatMessageHistory,
+    Union[
+        ConversationBufferMemory,
+        ConversationBufferWindowMemory,
+        ConversationSummaryMemory,
+        ConversationSummaryBufferMemory,
+    ],
+]:
+    """Chooses the memory type for the conversation based on the provided memory_type string."""
+    msgs = StreamlitChatMessageHistory(key="special_app_key")
+    if memory_type == "":
+        memory = ConversationBufferMemory(
+            memory_key="chat_history", chat_memory=msgs, return_messages=True
+        )
+    elif memory_type == "":
+        memory = ConversationBufferWindowMemory(
+            k=2, memory_key="chat_history", chat_memory=msgs, return_messages=True
+        )
+    elif memory_type == "":
+        memory = ConversationSummaryMemory(
+            llm=llm, memory_key="chat_history", chat_memory=msgs, return_messages=True
+        )
+    elif memory_type == "":
+        memory = ConversationSummaryBufferMemory(
+            llm=llm,
+            max_token_limit=100,
+            memory_key="chat_history",
+            chat_memory=msgs,
+            return_messages=True,
+        )
+    return msgs, memory

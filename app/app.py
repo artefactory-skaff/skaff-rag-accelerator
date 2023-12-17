@@ -9,37 +9,34 @@ from PIL import Image
 from streamlit_feedback import streamlit_feedback
 
 import lib.chatbot as utils
-from lib.auth import auth_cloud_run
 
 load_dotenv()
 embedding_api_base = os.getenv("EMBEDDING_OPENAI_API_BASE")
 embedding_api_key = os.getenv("EMBEDDING_API_KEY")
+FASTAPI_URL = "http://localhost:8000"
 
 
 if __name__ == "__main__":
-    logo_title = Image.open("interface/assets/Hello_bank_logo.png")
-    logo_tab = Image.open("interface/assets/hello_bank_chat_logo.jpeg")
-    logo_chat = Image.open("interface/assets/helloiz_logo.png")
-    logo_user = Image.open("interface/assets/logo_user.png")
+    logo_chat = Image.open("app/assets/logo_chat.png")
+    logo_tab = Image.open("app/assets/logo_tab.jpeg")
+    logo_title = Image.open("app/assets/logo_title.jpeg")
+    logo_user = Image.open("app/assets/logo_user.png")
 
     st.set_page_config(
-        page_title="Helloïz ChatBot",
+        page_title="RAG ChatBot",
         page_icon=logo_tab,
     )
-
-    if not auth_cloud_run():
-        st.stop()
 
     col1, mid, col2 = st.columns([4, 4, 20])
     with col1:
         st.image(logo_title, width=100)
     with col2:
-        st.title("Helloïz demo")
-    st.caption(
-        "Helloïz demo est un assistant IA offrant des conseils sur les offres \
-        et services de la banque en ligne Hello Bank.\
-        Il ne remplace pas un conseiller bancaire. Helloïz peut commettre des erreurs."
-    )
+        st.title("RAG ChatBot demo")
+    # st.caption(
+    #     "Helloïz demo est un assistant IA offrant des conseils sur les offres \
+    #     et services de la banque en ligne Hello Bank.\
+    #     Il ne remplace pas un conseiller bancaire. Helloïz peut commettre des erreurs."
+    # )
 
     msgs = StreamlitChatMessageHistory(key="special_app_key")
     memory = ConversationBufferMemory(
@@ -75,12 +72,9 @@ if __name__ == "__main__":
             response = utils.get_response(answer_chain, prompt)
             st.markdown(response)
 
-            # if st.session_state.get("run_id"):
             feedback = streamlit_feedback(
                 feedback_type="thumbs",
                 optional_text_label="[Optional] Please provide an explanation",
-                # on_submit=
-                # key=f"feedback_{st.session_state.run_id}",
             )
 
             if feedback:
