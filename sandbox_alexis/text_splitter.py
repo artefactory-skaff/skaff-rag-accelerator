@@ -1,8 +1,8 @@
-from typing import Optional
+from typing import List, Optional
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import TextLoader
 from langchain.schema.document import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 def load_and_split_document(
@@ -10,7 +10,8 @@ def load_and_split_document(
     text: Optional[str] = None,
     chunk_size: Optional[int] = 5000,
     chunk_overlap: Optional[int] = 50,
-) -> list[Document]:
+) -> List[Document]:
+    """Loads a document from a file or text and splits it into chunks."""
     if file_path and text:
         raise ValueError("Only one of `file_path` or `text` should be provided.")
 
@@ -21,9 +22,7 @@ def load_and_split_document(
     if file_path:
         loader = TextLoader(file_path=file_path)
         doc = loader.load()
-
     if text:
         doc = [Document(page_content=text)]
 
-    chunks = text_splitter.split_documents(doc)
-    return chunks
+    return text_splitter.split_documents(doc)

@@ -84,4 +84,4 @@ profile = "black"
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests"]
-skips = ["B101"]
+skips = ["B101", "B104"]

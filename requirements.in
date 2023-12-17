@@ -28,3 +28,5 @@ networkx
 openpyxl
 python-multipart
 httpx
+pytest
+python-jose
