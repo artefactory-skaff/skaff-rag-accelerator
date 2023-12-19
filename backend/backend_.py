@@ -3,7 +3,6 @@ from typing import List, Optional, Tuple, Union
 import streamlit as st
 from langchain.chat_models import AzureChatOpenAI
 from langchain.document_loaders import (
-    BaseLoader,
     CSVLoader,
     Docx2txtLoader,
     PyPDFLoader,
@@ -31,7 +30,7 @@ def get_llm(
     """Returns an instance of AzureChatOpenAI based on the provided parameters."""
     if model_version == "4":
         llm = AzureChatOpenAI(
-            deployment_name="gpt-4",
+            deployment_name="gpt4v",
             temperature=temperature,
             openai_api_version="2023-07-01-preview",
             streaming=live_streaming,
@@ -59,7 +58,7 @@ def get_embeddings_model(embedding_api_base: str, embedding_api_key: str) -> Ope
     )
 
 
-def load_documents(file_extension: str, file_path: str) -> BaseLoader:
+def load_documents(file_extension: str, file_path: str):
     """Loads documents based on the file extension and path provided."""
     if file_extension == ".pdf":
         loader = PyPDFLoader(file_path)

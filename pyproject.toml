@@ -3,18 +3,18 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scraping-hello-bank"
+name = "rag-as-a-service"
 authors = [
   { name = "sarah-lauzeral", email = "sarah.lauzeral@artefact.com" },
 ] # TODO: Add more authors if collaborators are added
-description = "scraping-hello-bank"
+description = "rag-as-a-service"
 version = "0.0.1"
 readme = "README.md"
 requires-python = ">=3.8"
 
 [project.urls]
-"Homepage" = "https://github.com/artefactory-fr/scraping-hello-bank"
-"Documentation" = "https://artefactory-fr.github.io/scraping-hello-bank"
+"Homepage" = "https://github.com/artefactory-fr/rag-as-a-service"
+"Documentation" = "https://artefactory-fr.github.io/rag-as-a-service"
 
 [tool.setuptools]
 packages = ["lib", "config", "tests"]

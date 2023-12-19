@@ -6,11 +6,11 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
-import lib.document_store as document_store
+import backend.document_store as document_store
 from database.database import Database
-from lib.document_store import StorageBackend
-from lib.model import Doc
-from lib.user_management import (
+from backend.document_store import StorageBackend
+from backend.model import Doc
+from backend.user_management import (
     ALGORITHM,
     SECRET_KEY,
     User,
@@ -116,8 +116,11 @@ async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
 # P1
 @app.post("/chat/user_message")
 async def chat_prompt(current_user: User = Depends(get_current_user)) -> dict:
-    """Send a message in a chat session."""
-    pass
+    # TODO: Log message to db
+    # TODO: Get response from model
+    # TODO: Log response to db
+    # TODO: Return response
+    return {"message": f"Unique response: {uuid4()}"}
 
 
 @app.post("/chat/regenerate")
@@ -147,7 +150,6 @@ async def chat(chat_id: str, current_user: User = Depends(get_current_user)) -> 
 async def feedback_thumbs_up(
     message_id: str, current_user: User = Depends(get_current_user)
 ) -> None:
-    """Record a 'thumbs up' feedback for a message."""
     with Database() as connection:
         connection.query(
             "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
@@ -159,7 +161,6 @@ async def feedback_thumbs_up(
 async def feedback_thumbs_down(
     message_id: str, current_user: User = Depends(get_current_user)
 ) -> None:
-    """Record a 'thumbs down' feedback for a message."""
     with Database() as connection:
         connection.query(
             "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
