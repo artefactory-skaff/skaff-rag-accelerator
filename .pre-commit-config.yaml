@@ -1,0 +1,40 @@
+repos:
+  - repo: "https://github.com/pre-commit/pre-commit-hooks"
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-toml
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+  - repo: local
+    hooks:
+      - id: black
+        name: Formatting (black)
+        entry: black
+        types: [python]
+        language: system
+      - id: isort
+        name: Sorting imports (isort)
+        entry: isort
+        types: [python]
+        language: system
+      - id: ruff
+        name: Linting (ruff)
+        entry: ruff
+        types: [python]
+        language: system
+      - id: nbstripout
+        name: Strip Jupyter notebook output (nbstripout)
+        entry: nbstripout
+        types: [file]
+        files: (.ipynb)$
+        language: system
+      - id: python-bandit-vulnerability-check
+        name: Security check (bandit)
+        entry: bandit
+        types: [python]
+        args: ["-c", "pyproject.toml"]
+        language: system
+exclude: ^(.svn|CVS|.bzr|.hg|.git|__pycache__|.tox|.ipynb_checkpoints|assets|tests/assets/|venv/|.venv/)
