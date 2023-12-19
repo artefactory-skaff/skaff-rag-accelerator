@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List
 from uuid import uuid4
 
@@ -9,7 +9,7 @@ from jose import JWTError, jwt
 import backend.document_store as document_store
 from database.database import Database
 from backend.document_store import StorageBackend
-from backend.model import Doc
+from backend.model import Doc, Message
 from backend.user_management import (
     ALGORITHM,
     SECRET_KEY,
@@ -106,21 +106,41 @@ async def user_me(current_user: User = Depends(get_current_user)) -> User:
 ############################################
 ###               Chat                   ###
 ############################################
-# P1
+
 @app.post("/chat/new")
 async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
-    """Create a new chat session for the current user."""
-    pass
+    chat_id = str(uuid4())
+    timestamp = datetime.now().isoformat()
+    user_id = current_user.email
+    with Database() as connection:
+        connection.query(
+            "INSERT INTO chat (id, timestamp, user_id) VALUES (?, ?, ?)",
+            (chat_id, timestamp, user_id),
+        )
+    return {"chat_id": chat_id}
 
+@app.post("/chat/{chat_id}/user_message")
+async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
+    with Database() as connection:
+        connection.query(
+            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
+            (message.id, message.timestamp, message.chat_id, message.sender, message.content),
+        )
+    
+    model_response = Message(
+        id=str(uuid4()),
+        timestamp=datetime.now().isoformat(),
+        chat_id=message.chat_id,
+        sender="assistant",
+        content=f"Unique response: {uuid4()}",
+    )
 
-# P1
-@app.post("/chat/user_message")
-async def chat_prompt(current_user: User = Depends(get_current_user)) -> dict:
-    # TODO: Log message to db
-    # TODO: Get response from model
-    # TODO: Log response to db
-    # TODO: Return response
-    return {"message": f"Unique response: {uuid4()}"}
+    with Database() as connection:
+        connection.query(
+            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
+            (model_response.id, model_response.timestamp, model_response.chat_id, model_response.sender, model_response.content),
+        )
+    return {"message": model_response}
 
 
 @app.post("/chat/regenerate")

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 CREATE TABLE IF NOT EXISTS "chat" (
     "id" TEXT PRIMARY KEY,
+    "timestamp" TEXT,
     "user_id" TEXT,
     FOREIGN KEY ("user_id") REFERENCES "user" ("email")
 );

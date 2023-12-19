@@ -1,14 +1,14 @@
+from datetime import datetime
+from uuid import uuid4
 from langchain.docstore.document import Document
 from pydantic import BaseModel
 
-
-class ChatMessage(BaseModel):
-    """Represents a chat message within a session."""
-
-    message: str
-    message_id: str
-    session_id: str
-
+class Message(BaseModel):
+    id: str
+    timestamp: str
+    chat_id: str
+    sender: str
+    content: str
 
 class Doc(BaseModel):
     """Represents a document with content and associated metadata."""
