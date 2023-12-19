@@ -131,6 +131,8 @@ exceptiongroup==1.2.0
     # via
     #   anyio
     #   pytest
+extra-streamlit-components==0.1.60
+    # via -r requirements.in
 fastapi==0.105.0
     # via chromadb
 fastjsonschema==2.19.0
@@ -497,6 +499,7 @@ stevedore==5.1.0
 streamlit==1.29.0
     # via
     #   -r requirements.in
+    #   extra-streamlit-components
     #   streamlit-feedback
     #   trubrics
 streamlit-feedback==0.1.2

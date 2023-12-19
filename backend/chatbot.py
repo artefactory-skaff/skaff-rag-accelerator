@@ -1,17 +1,11 @@
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-import pandas as pd
+from config_renderer import get_config
 from langchain.chains import ConversationalRetrievalChain, LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.chat_models import AzureChatOpenAI
-from langchain.document_loaders import (
-    CSVLoader,
-    Docx2txtLoader,
-    PyPDFLoader,
-    UnstructuredExcelLoader,
-    UnstructuredPowerPointLoader,
-)
+from langchain.document_loaders import DirectoryLoader
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.memory import (
     ConversationBufferMemory,
@@ -25,19 +19,19 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
     PromptTemplate,
 )
-from langchain.schema.document import Document
 from langchain.schema.messages import HumanMessage, SystemMessage
-from langchain.text_splitter import (
-    CharacterTextSplitter,
-    RecursiveCharacterTextSplitter,
-)
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 
-from backend.llm import get_model_instance
+from backend.embedding import get_embedding_model_instance
+from backend.llm import get_llm_model_instance
+from backend.vector_store import get_vector_store
+
 
 def get_response(answer_chain: ConversationalRetrievalChain, query: str) -> str:
     """Processes the given query through the answer chain and returns the formatted response."""
     return answer_chain.run(query)
+
 
 def get_answer_chain(
     llm, docsearch: Chroma, memory: ConversationBufferMemory
@@ -111,56 +105,18 @@ def get_embeddings_model(embedding_api_base: str, embedding_api_key: str) -> Ope
     )
 
 
-def get_documents(data: pd.DataFrame) -> List[Document]:
-    """Converts a dataframe into a list of Document objects."""
-    docs = data["answer"].tolist()
-    metadatas = data[["source", "question"]].to_dict("records")
-
-    documents = []
-    for text, metadata in zip(docs, metadatas):
-        document = Document(page_content=text, metadata=metadata)
-        documents.append(document)
-    return documents
-
-
-def load_documents(file_extension: str, file_path: str):
-    """Loads documents based on the file extension and path provided."""
-    if file_extension == ".pdf":
-        loader = PyPDFLoader(file_path)
-    elif file_extension in [".csv"]:
-        loader = CSVLoader(file_path, encoding="utf-8-sig", csv_args={"delimiter": "\t"})
-    elif file_extension in [".xlsx"]:
-        loader = UnstructuredExcelLoader(file_path, mode="elements")
-    elif file_extension in [".pptx"]:
-        loader = UnstructuredPowerPointLoader(file_path)
-    elif file_extension in [".docx"]:
-        loader = Docx2txtLoader(file_path)
-    else:
-        raise Exception("Unsupported file type!")
-
-    return loader.load()
-
-
-def get_chunks(
-    _documents: List[str], chunk_size: int, chunk_overlap: int, text_splitter_type: int
-) -> List[str]:
-    """Splits the documents into chunks."""
-    if text_splitter_type == "basic":
-        text_splitter = CharacterTextSplitter(
-            separator="\n\n",
-            chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap,
-        )
-    elif text_splitter_type == "recursive":
-        text_splitter = RecursiveCharacterTextSplitter(
-            separators=["\n\n", "\n", " "], chunk_size=chunk_size, chunk_overlap=chunk_overlap
-        )
-    return text_splitter.split_documents(_documents)
-
-
-def get_vector_store(_texts: List[str], _embeddings: OpenAIEmbeddings) -> Chroma:
-    """Returns an instance of Chroma based on the provided parameters."""
-    return Chroma.from_documents(_texts, _embeddings)
+def text_chunker(
+    directory_path: Path,
+    chunk_size: int,
+    chunk_overlap: int,
+    separators: Optional[List[str]] = ["\n\n", "\n", "\t"],
+):
+    loader = DirectoryLoader(directory_path, glob="**/*.txt")
+    docs = loader.load()
+    text_splitter = RecursiveCharacterTextSplitter(
+        separators=separators, chunk_size=chunk_size, chunk_overlap=chunk_overlap
+    )
+    return text_splitter.split_documents(docs)
 
 
 def choose_memory_type(
@@ -198,18 +154,23 @@ def choose_memory_type(
         )
     return msgs, memory
 
+
 if __name__ == "__main__":
-    llm = get_model_instance()
-
-    embeddings = get_embeddings_model("https://poc-openai-artefact.openai.azure.com/", "")
-
-    documents = load_documents(".csv", str(Path(__file__).parent / "billionaires_csv.csv"))
-    texts = get_chunks(documents, chunk_size=1500, chunk_overlap=200, text_splitter_type="recursive")
-    docsearch = get_vector_store(texts, embeddings)
+    config = get_config()
+    llm = get_llm_model_instance(config)
+    embeddings = get_embedding_model_instance(config)
+    vector_store = get_vector_store(embeddings)
+    texts = text_chunker(
+        directory_path=Path(__file__).parent.parent / "data/",
+        chunk_size=2000,
+        chunk_overlap=200,
+    )
+    vector_store.add_documents(texts)
     msgs, memory = choose_memory_type(memory_type="buffer")
-    answer_chain = get_answer_chain(llm, docsearch, memory)
+    answer_chain = get_answer_chain(llm, vector_store, memory)
 
-    prompt = "Qui sont les 3 personnes les plus riches en france ?"
+    # prompt = "Qui sont les 3 personnes les plus riches en france ?"
+    prompt = "Combien y a t'il de milliardaires en France ?"
     response = get_response(answer_chain, prompt)
     print("Prompt :", prompt)
     print("Response: ", response)

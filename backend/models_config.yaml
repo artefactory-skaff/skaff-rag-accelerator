@@ -2,7 +2,7 @@ llm_provider_config:
   openai_api_type: azure
   openai_api_base: https://poc-genai-gpt4.openai.azure.com/
   openai_api_version: 2023-07-01-preview
-  openai_api_key: 
+  openai_api_key: {{ OPENAI_API_KEY }}
 
 llm_model_config:
   model_source: AzureChatOpenAI
@@ -12,10 +12,15 @@ llm_model_config:
   verbose: true
 
 embedding_provider_config:
-  openai_api_base: "https://poc-openai-artefact.openai.azure.com/"
-  openai_api_key: 
+  openai_api_base: https://poc-openai-artefact.openai.azure.com/
+  openai_api_key: {{ EMBEDDING_API_KEY }}
+  openai_api_type: azure
 
 embedding_model_config:
   model_source: OpenAIEmbeddings
-  deployment: text-embedding-ada-002
+  deployment: embeddings
   chunk_size: 16
+
+vector_store_provider:
+  model_source: Chroma
+  persist_directory: database/
