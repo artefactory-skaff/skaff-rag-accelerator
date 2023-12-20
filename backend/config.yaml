@@ -12,15 +12,19 @@ llm_model_config:
   verbose: true
 
 embedding_provider_config:
+  openai_api_type: azure
   openai_api_base: https://poc-openai-artefact.openai.azure.com/
   openai_api_key: {{ EMBEDDING_API_KEY }}
-  openai_api_type: azure
 
 embedding_model_config:
   model_source: OpenAIEmbeddings
   deployment: embeddings
-  chunk_size: 16
+  chunk_size: 500
 
 vector_store_provider:
   model_source: Chroma
   persist_directory: database/
+
+chat_message_history_config:
+  source: ChatMessageHistory
+  window_size: 5
