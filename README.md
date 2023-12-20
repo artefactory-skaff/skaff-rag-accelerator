@@ -10,4 +10,9 @@ export PYTHONPATH="/Users/sarah.lauzeral/Library/CloudStorage/GoogleDrive-sarah.
 python "/Users/sarah.lauzeral/Library/CloudStorage/GoogleDrive-sarah.lauzeral@artefact.com/Mon Drive/internal_projects/skaff-rag-accelerator/backend/main.py"
 ```
 
+- comment mettre des docs dans le chatbot
+- comment lancer l'API
+- gestion de la config
+- écrire des helpers de co, pour envoyer des messages...
+
 </div>

@@ -1,18 +1,23 @@
 from langchain.chains import ConversationalRetrievalChain, LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-from langchain.chat_models.base import SystemMessage, HumanMessage
-from langchain.prompts import PromptTemplate, ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain.chat_models.base import HumanMessage, SystemMessage
+from langchain.prompts import (
+    ChatPromptTemplate,
+    HumanMessagePromptTemplate,
+    PromptTemplate,
+)
 from langchain.vectorstores import VectorStore
 
 from backend.config_renderer import get_config
+from backend.rag_components.chat_message_history import get_conversation_buffer_memory
 from backend.rag_components.embedding import get_embedding_model
 from backend.rag_components.llm import get_llm_model
 from backend.rag_components.vector_store import get_vector_store
-from backend.rag_components.chat_message_history import get_conversation_buffer_memory
 
 
 def get_response(answer_chain: ConversationalRetrievalChain, query: str) -> str:
     """Processes the given query through the answer chain and returns the formatted response."""
+    {"content": answer_chain.run(query), }
     return answer_chain.run(query)
 
 
@@ -69,14 +74,15 @@ Rephrased question :
 
 
 if __name__ == "__main__":
+    chat_id = "test"
     config = get_config()
     llm = get_llm_model(config)
     embeddings = get_embedding_model(config)
-    vector_store = get_vector_store(embeddings)
-    memory = get_conversation_buffer_memory(config)
+    vector_store = get_vector_store(embeddings, config)
+    memory = get_conversation_buffer_memory(config, chat_id)
     answer_chain = get_answer_chain(llm, vector_store, memory)
 
     prompt = "Give me the top 5 bilionnaires in france based on their worth in order of decreasing net worth"
     response = get_response(answer_chain, prompt)
-    print("Prompt :", prompt)
+    print("Prompt: ", prompt)
     print("Response: ", response)

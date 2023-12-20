@@ -7,7 +7,6 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
 import backend.document_store as document_store
-from database.database import Database
 from backend.document_store import StorageBackend
 from backend.model import Doc, Message
 from backend.user_management import (
@@ -20,6 +19,7 @@ from backend.user_management import (
     get_user,
     user_exists,
 )
+from database.database import Database
 
 app = FastAPI()
 
@@ -107,6 +107,7 @@ async def user_me(current_user: User = Depends(get_current_user)) -> User:
 ###               Chat                   ###
 ############################################
 
+
 @app.post("/chat/new")
 async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
     chat_id = str(uuid4())
@@ -119,6 +120,7 @@ async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
         )
     return {"chat_id": chat_id}
 
+
 @app.post("/chat/{chat_id}/user_message")
 async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
     with Database() as connection:
@@ -126,6 +128,8 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
             "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
             (message.id, message.timestamp, message.chat_id, message.sender, message.content),
         )
+
+    #TODO : faire la réposne du llm
     
     model_response = Message(
         id=str(uuid4()),
@@ -138,7 +142,13 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
     with Database() as connection:
         connection.query(
             "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (model_response.id, model_response.timestamp, model_response.chat_id, model_response.sender, model_response.content),
+            (
+                model_response.id,
+                model_response.timestamp,
+                model_response.chat_id,
+                model_response.sender,
+                model_response.content,
+            ),
         )
     return {"message": model_response}
 

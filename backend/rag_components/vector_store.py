@@ -1,11 +1,9 @@
 import inspect
 
-from config_renderer import get_config
 from langchain import vectorstores
 
 
-def get_vector_store(embedding_model):
-    config = get_config()
+def get_vector_store(embedding_model, config):
     vector_store_spec = getattr(vectorstores, config["vector_store_provider"]["model_source"])
     all_config_field = config["vector_store_provider"]
 

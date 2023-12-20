@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from lib.main import app
 
 from database.database import Database
-from lib.main import app
 
 os.environ["TESTING"] = "True"
 client = TestClient(app)

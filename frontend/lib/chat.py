@@ -1,10 +1,10 @@
-from uuid import uuid4
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from uuid import uuid4
 
 import streamlit as st
-
-from dataclasses import dataclass, asdict
 from streamlit_feedback import streamlit_feedback
+
 
 @dataclass
 class Message:
@@ -17,6 +17,7 @@ class Message:
     def __post_init__(self):
         self.id = str(uuid4()) if self.id is None else self.id
         self.timestamp = datetime.now().isoformat() if self.timestamp is None else self.timestamp
+
 
 def chat():
     prompt = st.chat_input("Say something")
@@ -35,8 +36,17 @@ def chat():
         for message in st.session_state.get("messages", []):
             with st.chat_message(message.sender):
                 st.write(message.content)
-        if len(st.session_state.get("messages", [])) > 0 and len(st.session_state.get("messages")) % 2 == 0:
-            streamlit_feedback(key=str(len(st.session_state.get("messages"))), feedback_type="thumbs", on_submit=lambda feedback: send_feedback(st.session_state.get("messages")[-1].id, feedback))
+        if (
+            len(st.session_state.get("messages", [])) > 0
+            and len(st.session_state.get("messages")) % 2 == 0
+        ):
+            streamlit_feedback(
+                key=str(len(st.session_state.get("messages"))),
+                feedback_type="thumbs",
+                on_submit=lambda feedback: send_feedback(
+                    st.session_state.get("messages")[-1].id, feedback
+                ),
+            )
 
 
 def new_chat():
@@ -46,12 +56,14 @@ def new_chat():
     st.session_state["messages"] = []
     return response.json()["chat_id"]
 
+
 def send_prompt(message: Message):
     session = st.session_state.get("session")
     response = session.post(f"/chat/{message.chat_id}/user_message", json=asdict(message))
     print(response.headers)
     print(response.text)
     return response.json()["message"]
+
 
 def send_feedback(message_id: str, feedback: str):
     feedback = "thumbs_up" if feedback["score"] == "👍" else "thumbs_down"

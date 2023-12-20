@@ -19,10 +19,11 @@ CREATE TABLE IF NOT EXISTS "chat" (
 
 CREATE TABLE IF NOT EXISTS "message" (
     "id" TEXT PRIMARY KEY,
-    "timestamp" TEXT,
+    "timestamp" DATETIME,
     "chat_id" TEXT,
     "sender" TEXT,
     "content" TEXT,
+    "message" TEXT,
     FOREIGN KEY ("chat_id") REFERENCES "chat" ("id")
 );
 
