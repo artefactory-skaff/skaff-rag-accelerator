@@ -137,3 +137,5 @@ secrets/*
 # Mac OS
 .DS_Store
 data/
+
+*.sqlite
