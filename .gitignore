@@ -139,3 +139,4 @@ secrets/*
 data/
 
 *.sqlite
+*.sqlite3
