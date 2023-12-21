@@ -129,8 +129,8 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
             (message.id, message.timestamp, message.chat_id, message.sender, message.content),
         )
 
-    #TODO : faire la réposne du llm
-    
+    # TODO : faire la réposne du llm
+
     model_response = Message(
         id=str(uuid4()),
         timestamp=datetime.now().isoformat(),

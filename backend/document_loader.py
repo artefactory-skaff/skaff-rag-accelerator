@@ -9,11 +9,14 @@ from langchain.prompts import PromptTemplate
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.utils import filter_complex_metadata
 
+# TODO rajhouter fonction level avec opssibilité de rajouter l'objet document de langchain
+# TODO rename load_dopcument en load_embeddded document
+
 
 def load_document(file_path: Path, llm: BaseChatModel, vector_store: VectorStore):
     documents = get_documents(file_path, llm)
     filtered_documents = filter_complex_metadata(documents)
-    vector_store.add_documents(documents)
+    vector_store.add_documents(filtered_documents)
 
 
 def get_documents(file_path: Path, llm: BaseChatModel):
