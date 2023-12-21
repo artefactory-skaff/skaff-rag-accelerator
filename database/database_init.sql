@@ -23,7 +23,6 @@ CREATE TABLE IF NOT EXISTS "message" (
     "chat_id" TEXT,
     "sender" TEXT,
     "content" TEXT,
-    "message" TEXT,
     FOREIGN KEY ("chat_id") REFERENCES "chat" ("id")
 );
 
