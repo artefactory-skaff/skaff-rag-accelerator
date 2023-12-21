@@ -22,20 +22,35 @@ class Message:
 def chat():
     prompt = st.chat_input("Say something")
 
-    if prompt:
-        if len(st.session_state.get("messages", [])) == 0:
-            chat_id = new_chat()
-        else:
-            chat_id = st.session_state.get("chat_id")
-
-        st.session_state.get("messages").append(Message("user", prompt, chat_id))
-        response = send_prompt(st.session_state.get("messages")[-1])
-        st.session_state.get("messages").append(Message(**response))
-
     with st.container(border=True):
         for message in st.session_state.get("messages", []):
             with st.chat_message(message.sender):
                 st.write(message.content)
+
+        if prompt:
+            if len(st.session_state.get("messages", [])) == 0:
+                chat_id = new_chat()
+            else:
+                chat_id = st.session_state.get("chat_id")
+
+            with st.chat_message("user"):
+                st.write(prompt)
+
+            user_message = Message("user", prompt, chat_id)
+            st.session_state["messages"].append(user_message)
+
+            response = send_prompt(user_message)
+            with st.chat_message("assistant"):
+                placeholder = st.empty()
+                full_response = ''
+                for item in response:
+                    full_response += item
+                    placeholder.write(full_response)
+                placeholder.write(full_response)
+
+            bot_message = Message("assistant", full_response, chat_id)
+            st.session_state["messages"].append(bot_message)
+
         if (
             len(st.session_state.get("messages", [])) > 0
             and len(st.session_state.get("messages")) % 2 == 0
@@ -43,9 +58,7 @@ def chat():
             streamlit_feedback(
                 key=str(len(st.session_state.get("messages"))),
                 feedback_type="thumbs",
-                on_submit=lambda feedback: send_feedback(
-                    st.session_state.get("messages")[-1].id, feedback
-                ),
+                on_submit=lambda feedback: send_feedback(st.session_state.get("messages")[-1].id, feedback),
             )
 
 
@@ -59,10 +72,10 @@ def new_chat():
 
 def send_prompt(message: Message):
     session = st.session_state.get("session")
-    response = session.post(f"/chat/{message.chat_id}/user_message", json=asdict(message))
-    print(response.headers)
-    print(response.text)
-    return response.json()["message"]
+    response = session.post(f"/chat/{message.chat_id}/user_message", stream=True, json=asdict(message))
+
+    for line in response.iter_content(chunk_size=16, decode_unicode=True):
+        yield line
 
 
 def send_feedback(message_id: str, feedback: str):

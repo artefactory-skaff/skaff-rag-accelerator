@@ -3,8 +3,10 @@ from typing import List
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
+
 
 import backend.document_store as document_store
 from backend.document_store import StorageBackend
@@ -20,6 +22,11 @@ from backend.user_management import (
     user_exists,
 )
 from database.database import Database
+from backend.config_renderer import get_config
+from backend.rag_components.chat_message_history import get_conversation_buffer_memory
+from backend.rag_components.embedding import get_embedding_model
+from backend.rag_components.vector_store import get_vector_store
+from backend.chatbot import get_answer_chain, get_response_stream
 
 app = FastAPI()
 
@@ -121,22 +128,18 @@ async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
     return {"chat_id": chat_id}
 
 
-@app.post("/chat/{chat_id}/user_message")
-async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
-    with Database() as connection:
-        connection.query(
-            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (message.id, message.timestamp, message.chat_id, message.sender, message.content),
-        )
+async def streamed_llm_response(chat_id, answer_chain):
+    full_response = ""
+    async for data in answer_chain:
+        full_response += data
+        yield data.encode("utf-8")
 
-    #TODO : faire la réposne du llm
-    
     model_response = Message(
         id=str(uuid4()),
         timestamp=datetime.now().isoformat(),
-        chat_id=message.chat_id,
+        chat_id=chat_id,
         sender="assistant",
-        content=f"Unique response: {uuid4()}",
+        content=full_response,
     )
 
     with Database() as connection:
@@ -150,7 +153,25 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
                 model_response.content,
             ),
         )
-    return {"message": model_response}
+    
+
+@app.post("/chat/{chat_id}/user_message")
+async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
+    with Database() as connection:
+        connection.query(
+            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
+            (message.id, message.timestamp, message.chat_id, message.sender, message.content),
+        )
+
+    config = get_config()
+    embeddings = get_embedding_model(config)
+    vector_store = get_vector_store(embeddings, config)
+    memory = get_conversation_buffer_memory(config, message.chat_id)
+    answer_chain, callback_handler = get_answer_chain(config, vector_store, memory)
+
+    response_stream = get_response_stream(answer_chain, callback_handler, message.content)
+
+    return StreamingResponse(streamed_llm_response(message.chat_id, response_stream), media_type="text/event-stream")
 
 
 @app.post("/chat/regenerate")
