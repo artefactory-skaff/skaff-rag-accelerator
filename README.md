@@ -14,5 +14,7 @@ python "/Users/sarah.lauzeral/Library/CloudStorage/GoogleDrive-sarah.lauzeral@ar
 - comment lancer l'API
 - gestion de la config
 - écrire des helpers de co, pour envoyer des messages...
+- tester différents modèles
+- écrire des snippets de code pour éxpliquer comment charger les docs dans le RAG
 
 </div>

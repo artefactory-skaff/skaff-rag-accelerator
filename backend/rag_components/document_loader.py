@@ -1,24 +1,16 @@
 import inspect
 from pathlib import Path
-from time import sleep
 from typing import List
 
 from langchain.chains import LLMChain
 from langchain.chat_models.base import BaseChatModel
 from langchain.prompts import PromptTemplate
-from langchain.vectorstores import VectorStore
-from langchain.vectorstores.utils import filter_complex_metadata
-
-
-def load_document(file_path: Path, llm: BaseChatModel, vector_store: VectorStore):
-    documents = get_documents(file_path, llm)
-    filtered_documents = filter_complex_metadata(documents)
-    vector_store.add_documents(documents)
 
 
 def get_documents(file_path: Path, llm: BaseChatModel):
     file_extension = file_path.suffix
     loader_class_name = get_best_loader(file_extension, llm)
+    print(f"loader selected {loader_class_name} for {file_path}")
 
     if loader_class_name == "None":
         raise Exception(f"No loader found for {file_extension} files.")
@@ -64,21 +56,12 @@ if __name__ == "__main__":
     from pathlib import Path
 
     from backend.config_renderer import get_config
-    from backend.document_loader import get_documents
-    from backend.rag_components.embedding import get_embedding_model
-    from backend.rag_components.llm import get_llm_model
-    from backend.rag_components.vector_store import get_vector_store
+    from frontend.lib.chat import Message
 
     config = get_config()
-    llm = get_llm_model(config)
-    embeddings = get_embedding_model(config)
-    vector_store = get_vector_store(embeddings)
-
-    document = load_document(
-        file_path=Path(
-            "/Users/alexis.vialaret/vscode_projects/skaff-rag-accelerator/data/billionaires_csv.csv"
-        ),
-        llm=llm,
-        vector_store=vector_store,
-    )
-    print(document)
+    data_to_store = Path(f"{Path(__file__).parent.parent.parent}/data/billionaires_csv.csv")
+    prompt = "Quelles sont les 5 plus grandes fortunes de France ?"
+    chat_id = "test"
+    input_query = Message("user", prompt, chat_id)
+    response = generate_response(data_to_store, config, input_query)
+    print(response)
