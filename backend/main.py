@@ -8,7 +8,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
 
-import backend.document_store as document_store
+
+from backend.config_renderer import get_config
 from backend.document_store import StorageBackend
 from backend.model import Doc, Message
 from backend.user_management import (
