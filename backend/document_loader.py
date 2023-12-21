@@ -9,8 +9,8 @@ from langchain.prompts import PromptTemplate
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.utils import filter_complex_metadata
 
-# TODO rajhouter fonction level avec opssibilité de rajouter l'objet document de langchain
-# TODO rename load_dopcument en load_embeddded document
+# TODO rajouter top level fonction avec possibilité de rajouter l'objet document de langchain
+# TODO rename load_document en load_embedded_document
 
 
 def load_document(file_path: Path, llm: BaseChatModel, vector_store: VectorStore):
@@ -78,9 +78,7 @@ if __name__ == "__main__":
     vector_store = get_vector_store(embeddings)
 
     document = load_document(
-        file_path=Path(
-            "/Users/alexis.vialaret/vscode_projects/skaff-rag-accelerator/data/billionaires_csv.csv"
-        ),
+        file_path=Path(f"{Path(__file__).parent}/data/billionaires_csv.csv"),
         llm=llm,
         vector_store=vector_store,
     )

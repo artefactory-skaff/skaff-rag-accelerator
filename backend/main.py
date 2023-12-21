@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List
 from uuid import uuid4
 
@@ -7,8 +8,15 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
 import backend.document_store as document_store
+from backend.chatbot import get_answer_chain, get_response
+from backend.config_renderer import get_config
+from backend.document_loader import load_document
 from backend.document_store import StorageBackend
 from backend.model import Doc, Message
+from backend.rag_components.chat_message_history import get_conversation_buffer_memory
+from backend.rag_components.embedding import get_embedding_model
+from backend.rag_components.llm import get_llm_model
+from backend.rag_components.vector_store import get_vector_store
 from backend.user_management import (
     ALGORITHM,
     SECRET_KEY,
@@ -129,14 +137,25 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
             (message.id, message.timestamp, message.chat_id, message.sender, message.content),
         )
 
-    # TODO : faire la réposne du llm
+    config = get_config()
+    llm = get_llm_model(config)
+    embeddings = get_embedding_model(config)
+    vector_store = get_vector_store(embeddings, config)
+    document = load_document(
+        file_path=Path(f"{Path(__file__).parent.parent}/data/billionaires_csv.csv"),
+        llm=llm,
+        vector_store=vector_store,
+    )
+    memory = get_conversation_buffer_memory(config, message.chat_id)
+    answer_chain = get_answer_chain(llm, vector_store, memory)
+    response = get_response(answer_chain, message.content)
 
     model_response = Message(
         id=str(uuid4()),
         timestamp=datetime.now().isoformat(),
         chat_id=message.chat_id,
         sender="assistant",
-        content=f"Unique response: {uuid4()}",
+        content=response,
     )
 
     with Database() as connection:

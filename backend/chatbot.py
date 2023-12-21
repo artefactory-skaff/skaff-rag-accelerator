@@ -17,9 +17,6 @@ from backend.rag_components.vector_store import get_vector_store
 
 def get_response(answer_chain: ConversationalRetrievalChain, query: str) -> str:
     """Processes the given query through the answer chain and returns the formatted response."""
-    {
-        "content": answer_chain.run(query),
-    }
     return answer_chain.run(query)
 
 
