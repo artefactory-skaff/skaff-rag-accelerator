@@ -3,8 +3,11 @@ from typing import List
 
 from langchain.docstore.document import Document
 from langchain.vectorstores.utils import filter_complex_metadata
+from backend.rag_components.chain import get_answer_chain, get_response_stream
 
-from backend.config_renderer import get_config
+from backend.rag_components.config_renderer import get_config
+from backend.model import Message
+from backend.rag_components.chat_message_history import get_conversation_buffer_memory
 from backend.rag_components.document_loader import get_documents
 from backend.rag_components.embedding import get_embedding_model
 from backend.rag_components.llm import get_llm_model
@@ -12,14 +15,22 @@ from backend.rag_components.vector_store import get_vector_store
 
 
 class RAG:
-    def __init__(self):
-        self.config = get_config()
+    def __init__(self, config_file_path: Path = None):
+        if config_file_path is None:
+            config_file_path = Path(__file__).parents[1]
+
+        self.config = get_config(config_file_path)
         self.llm = get_llm_model(self.config)
         self.embeddings = get_embedding_model(self.config)
         self.vector_store = get_vector_store(self.embeddings, self.config)
 
-    def generate_response():
-        pass
+    def generate_response(self, message: Message):
+        embeddings = get_embedding_model(self.config)
+        vector_store = get_vector_store(embeddings, self.config)
+        memory = get_conversation_buffer_memory(self.config, message.chat_id)
+        answer_chain, callback_handler = get_answer_chain(self.config, vector_store, memory)
+        response_stream = get_response_stream(answer_chain, callback_handler, message.content)
+        return response_stream
 
     def load_documents(self, documents: List[Document]):
         # TODO améliorer la robustesse du load_document

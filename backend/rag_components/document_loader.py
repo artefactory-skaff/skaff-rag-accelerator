@@ -50,18 +50,3 @@ def get_loaders() -> List[str]:
         if inspect.isclass(obj):
             loaders.append(obj.__name__)
     return loaders
-
-
-if __name__ == "__main__":
-    from pathlib import Path
-
-    from backend.config_renderer import get_config
-    from frontend.lib.chat import Message
-
-    config = get_config()
-    data_to_store = Path(f"{Path(__file__).parent.parent.parent}/data/billionaires_csv.csv")
-    prompt = "Quelles sont les 5 plus grandes fortunes de France ?"
-    chat_id = "test"
-    input_query = Message("user", prompt, chat_id)
-    response = generate_response(data_to_store, config, input_query)
-    print(response)

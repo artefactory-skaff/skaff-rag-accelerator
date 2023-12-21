@@ -8,10 +8,8 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
 
-
-from backend.config_renderer import get_config
-from backend.document_store import StorageBackend
-from backend.model import Doc, Message
+from backend.model import Message
+from backend.rag_components.main import RAG
 from backend.user_management import (
     ALGORITHM,
     SECRET_KEY,
@@ -23,11 +21,6 @@ from backend.user_management import (
     user_exists,
 )
 from database.database import Database
-from backend.config_renderer import get_config
-from backend.rag_components.chat_message_history import get_conversation_buffer_memory
-from backend.rag_components.embedding import get_embedding_model
-from backend.rag_components.vector_store import get_vector_store
-from backend.chatbot import get_answer_chain, get_response_stream
 
 app = FastAPI()
 
@@ -48,10 +41,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("email")  # 'sub' is commonly used to store user identity
+        email: str = payload.get("email")
         if email is None:
             raise credentials_exception
-        # Here you should fetch the user from the database by user_id
+
         user = get_user(email)
         if user is None:
             raise credentials_exception
@@ -164,15 +157,10 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
             (message.id, message.timestamp, message.chat_id, message.sender, message.content),
         )
 
-    config = get_config()
-    embeddings = get_embedding_model(config)
-    vector_store = get_vector_store(embeddings, config)
-    memory = get_conversation_buffer_memory(config, message.chat_id)
-    answer_chain, callback_handler = get_answer_chain(config, vector_store, memory)
+    rag = RAG()
+    response = rag.generate_response(message)
 
-    response_stream = get_response_stream(answer_chain, callback_handler, message.content)
-
-    return StreamingResponse(streamed_llm_response(message.chat_id, response_stream), media_type="text/event-stream")
+    return StreamingResponse(streamed_llm_response(message.chat_id, response), media_type="text/event-stream")
 
 
 @app.post("/chat/regenerate")
@@ -218,17 +206,6 @@ async def feedback_thumbs_down(
             "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
             (str(uuid4()), message_id, "thumbs_down"),
         )
-
-
-############################################
-###                Other                 ###
-############################################
-
-
-@app.post("/index/documents")
-async def index_documents(chunks: List[Doc], bucket: str, storage_backend: StorageBackend) -> None:
-    """Index documents in a specified storage backend."""
-    document_store.store_documents(chunks, bucket, storage_backend)
 
 
 if __name__ == "__main__":
