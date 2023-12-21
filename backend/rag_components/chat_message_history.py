@@ -1,16 +1,7 @@
-import json
 import os
-from datetime import datetime
-from typing import Any
-from uuid import uuid4
 
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.memory.chat_message_histories import SQLChatMessageHistory
-from langchain.memory.chat_message_histories.sql import DefaultMessageConverter
-from langchain.schema import BaseMessage
-from langchain.schema.messages import BaseMessage, _message_to_dict
-from sqlalchemy import Column, DateTime, Text
-from sqlalchemy.orm import declarative_base
 
 TABLE_NAME = "message_history"
 

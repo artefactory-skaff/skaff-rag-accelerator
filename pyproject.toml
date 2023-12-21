@@ -34,7 +34,7 @@ select = [
   "PTH",
   "PD",
 ] # See: https://beta.ruff.rs/docs/rules/
-ignore = ["D100", "D203", "D213", "ANN101", "ANN102"]
+ignore = ["D100", "D103", "D203", "D213", "ANN101", "ANN102"]
 line-length = 100
 target-version = "py310"
 exclude = [
