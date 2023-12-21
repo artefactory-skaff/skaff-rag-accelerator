@@ -1,46 +1,16 @@
 import inspect
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 from langchain.chains import LLMChain
 from langchain.chat_models.base import BaseChatModel
-from langchain.docstore.document import Document
 from langchain.prompts import PromptTemplate
-from langchain.vectorstores import VectorStore
-from langchain.vectorstores.utils import filter_complex_metadata
-
-from backend.chatbot import get_answer_chain, get_response
-from backend.rag_components.chat_message_history import get_conversation_buffer_memory
-from backend.rag_components.embedding import get_embedding_model
-from backend.rag_components.llm import get_llm_model
-from backend.rag_components.vector_store import get_vector_store
-
-
-def generate_response(file_path: Path, config, input_query):
-    llm = get_llm_model(config)
-    embeddings = get_embedding_model(config)
-    vector_store = get_vector_store(embeddings, config)
-    store_documents(file_path, llm, vector_store)
-    memory = get_conversation_buffer_memory(config, input_query.chat_id)
-    answer_chain = get_answer_chain(llm, vector_store, memory)
-    response = get_response(answer_chain, input_query.content)
-    return response
-
-
-def store_documents(
-    data_to_store: Union[Path, Document], llm: BaseChatModel, vector_store: VectorStore
-):
-    if isinstance(data_to_store, Path):
-        documents = get_documents(data_to_store, llm)
-        filtered_documents = filter_complex_metadata(documents)
-        vector_store.add_documents(filtered_documents)
-    else:
-        vector_store.add_documents(data_to_store)
 
 
 def get_documents(file_path: Path, llm: BaseChatModel):
     file_extension = file_path.suffix
     loader_class_name = get_best_loader(file_extension, llm)
+    print(f"loader selected {loader_class_name} for {file_path}")
 
     if loader_class_name == "None":
         raise Exception(f"No loader found for {file_extension} files.")

@@ -133,23 +133,6 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
 
     config = get_config()
 
-    rag_on_file = False
-    file_path_str = f"{Path(__file__).parent.parent}/data/billionaires_csv.csv"
-    if rag_on_file:
-        docs_to_store = Path(file_path_str)
-    else:
-        from langchain.document_loaders import CSVLoader
-        from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-        loader = CSVLoader(file_path_str)
-        documents = loader.load()
-        text_splitter = RecursiveCharacterTextSplitter(
-            separators=["\n\n", "\n"], chunk_size=1500, chunk_overlap=100
-        )
-        docs_to_store = text_splitter.split_documents(documents)
-
-    response = generate_response(docs_to_store, config, message)
-
     model_response = Message(
         id=str(uuid4()),
         timestamp=datetime.now().isoformat(),

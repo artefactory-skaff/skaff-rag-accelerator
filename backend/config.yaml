@@ -23,7 +23,7 @@ embedding_model_config:
 
 vector_store_provider:
   model_source: Chroma
-  persist_directory: database/
+  persist_directory: vector_database/
 
 chat_message_history_config:
   source: ChatMessageHistory
