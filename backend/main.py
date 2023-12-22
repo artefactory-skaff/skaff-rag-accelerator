@@ -208,7 +208,7 @@ async def feedback_thumbs_down(
 @app.post("/index/documents")
 async def index_documents(chunks: List[Doc], bucket: str, storage_backend: StorageBackend) -> None:
     """Index documents in a specified storage backend."""
-    document_store.store_documents(chunks, bucket, storage_backend)
+    store_documents(chunks, bucket, storage_backend)
 
 
 if __name__ == "__main__":

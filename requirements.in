@@ -33,3 +33,5 @@ pytest
 python-jose
 trubrics[streamlit]
 uvicorn
+apify-client
+sentence_transformers

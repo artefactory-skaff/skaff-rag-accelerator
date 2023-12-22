@@ -24,6 +24,7 @@ embedding_model_config:
 vector_store_provider:
   model_source: Chroma
   persist_directory: vector_database/
+  cleanup_mode: full
 
 chat_message_history_config:
   source: ChatMessageHistory
