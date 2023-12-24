@@ -137,6 +137,7 @@ secrets/*
 # Mac OS
 .DS_Store
 data/
+vector_database/
 
 *.sqlite
 *.sqlite3
