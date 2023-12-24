@@ -1,6 +1,7 @@
 import asyncio
 from langchain.chains import ConversationalRetrievalChain, LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
+from langchain.chains.combine_documents.reduce import ReduceDocumentsChain
 from langchain.chat_models.base import SystemMessage
 from langchain.prompts import (
     ChatPromptTemplate,
@@ -36,17 +37,21 @@ def get_answer_chain(config, docsearch: VectorStore, memory) -> ConversationalRe
 
     context_with_docs_prompt = PromptTemplate(template=prompts.document_context, input_variables=["page_content", "source"])
     
-    final_qa_chain = StuffDocumentsChain(
+    stuffed_qa_chain = StuffDocumentsChain(
         llm_chain=question_answering_chain,
         document_variable_name="context",
         document_prompt=context_with_docs_prompt,
     )
 
+    reduced_qa_chain = ReduceDocumentsChain(
+        combine_documents_chain=stuffed_qa_chain,
+    )
+
     chain = ConversationalRetrievalChain(
         question_generator=condense_question_chain,
-        retriever=docsearch.as_retriever(search_kwargs={"k": config["vector_store_provider"]["documents_to_retreive"]}),
+        retriever=docsearch.as_retriever(search_type=config["vector_store_provider"]["search_type"], search_kwargs=config["vector_store_provider"]["search_options"]),
         memory=memory,
-        combine_docs_chain=final_qa_chain,
+        combine_docs_chain=reduced_qa_chain,
     )
 
     return chain, callback_handler

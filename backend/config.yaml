@@ -23,6 +23,12 @@ vector_store_provider:
   model_source: Chroma
   persist_directory: vector_database/
   documents_to_retreive: 10
+  collection_metadata:
+    hnsw:space: cosine
+  search_type: similarity
+  search_options:
+    score_threshold: 0.5
+    top_k: 20
 
 chat_message_history_config:
   source: ChatMessageHistory

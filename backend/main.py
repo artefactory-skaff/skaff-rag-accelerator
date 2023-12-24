@@ -33,7 +33,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
-    """Get the current user by decoding the JWT token."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -55,7 +54,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 
 @app.post("/user/signup")
 async def signup(user: User) -> dict:
-    """Sign up a new user."""
     if user_exists(user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"User {user.email} already registered"
@@ -67,7 +65,6 @@ async def signup(user: User) -> dict:
 
 @app.delete("/user/")
 async def delete_user(current_user: User = Depends(get_current_user)) -> dict:
-    """Delete an existing user."""
     email = current_user.email
     try:
         user = get_user(email)
@@ -85,7 +82,6 @@ async def delete_user(current_user: User = Depends(get_current_user)) -> dict:
 
 @app.post("/user/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
-    """Log in a user and return an access token."""
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(

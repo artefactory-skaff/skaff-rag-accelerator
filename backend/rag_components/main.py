@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 from langchain.docstore.document import Document
+from langchain.vectorstores import VectorStore
 from langchain.vectorstores.utils import filter_complex_metadata
 from backend.rag_components.chain import get_answer_chain, get_response_stream
 
@@ -22,13 +23,11 @@ class RAG:
         self.config = get_config(config_file_path)
         self.llm = get_llm_model(self.config)
         self.embeddings = get_embedding_model(self.config)
-        self.vector_store = get_vector_store(self.embeddings, self.config)
+        self.vector_store: VectorStore = get_vector_store(self.embeddings, self.config)
 
     def generate_response(self, message: Message):
-        embeddings = get_embedding_model(self.config)
-        vector_store = get_vector_store(embeddings, self.config)
         memory = get_conversation_buffer_memory(self.config, message.chat_id)
-        answer_chain, callback_handler = get_answer_chain(self.config, vector_store, memory)
+        answer_chain, callback_handler = get_answer_chain(self.config, self.vector_store, memory)
         response_stream = get_response_stream(answer_chain, callback_handler, message.content)
         return response_stream
 
@@ -53,7 +52,6 @@ class RAG:
 if __name__ == "__main__":
     file_path = Path(__file__).parent.parent.parent / "data"
     rag = RAG()
-
     for file in file_path.iterdir():
         if file.is_file():
             rag.load_file(file)
