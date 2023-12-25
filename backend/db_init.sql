@@ -1,7 +1,6 @@
 -- Go to https://dbdiagram.io/d/RAGAAS-63dbdcc6296d97641d7e07c8
 -- Make your changes
 -- Export > Export to PostgresSQL (or other)
--- Translate to SQLite (works with a cmd+k in Cursor, or https://www.rebasedata.com/convert-postgresql-to-sqlite-online)
 -- Paste here
 -- Replace "CREATE TABLE" with "CREATE TABLE IF NOT EXISTS"
 
@@ -12,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 CREATE TABLE IF NOT EXISTS "chat" (
     "id" TEXT PRIMARY KEY,
-    "timestamp" TEXT,
+    "timestamp" DATETIME,
     "user_id" TEXT,
     FOREIGN KEY ("user_id") REFERENCES "user" ("email")
 );

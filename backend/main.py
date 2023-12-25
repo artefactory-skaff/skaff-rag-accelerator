@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 from typing import List
 from uuid import uuid4
+from dotenv import load_dotenv
+
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
+from backend.logger import get_logger
 
 
 from backend.model import Message
@@ -20,9 +23,14 @@ from backend.user_management import (
     get_user,
     user_exists,
 )
-from database.database import Database
+from backend.database import Database
 
+load_dotenv()
 app = FastAPI()
+logger = get_logger()
+
+with Database() as connection:
+    connection.initialize_schema()
 
 
 ############################################
@@ -111,7 +119,7 @@ async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
     timestamp = datetime.now().isoformat()
     user_id = current_user.email
     with Database() as connection:
-        connection.query(
+        connection.execute(
             "INSERT INTO chat (id, timestamp, user_id) VALUES (?, ?, ?)",
             (chat_id, timestamp, user_id),
         )
@@ -133,7 +141,7 @@ async def streamed_llm_response(chat_id, answer_chain):
     )
 
     with Database() as connection:
-        connection.query(
+        connection.execute(
             "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
             (
                 model_response.id,
@@ -148,12 +156,18 @@ async def streamed_llm_response(chat_id, answer_chain):
 @app.post("/chat/{chat_id}/user_message")
 async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
     with Database() as connection:
-        connection.query(
+        connection.execute(
             "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
             (message.id, message.timestamp, message.chat_id, message.sender, message.content),
         )
-
-    rag = RAG()
+    
+    context = {
+        "user": current_user.email,
+        "chat_id": message.chat_id,
+        "message_id": message.id,
+        "timestamp": message.timestamp,
+    }
+    rag = RAG(logger=logger, context=context)
     response = rag.generate_response(message)
 
     return StreamingResponse(streamed_llm_response(message.chat_id, response), media_type="text/event-stream")
@@ -187,7 +201,7 @@ async def feedback_thumbs_up(
     message_id: str, current_user: User = Depends(get_current_user)
 ) -> None:
     with Database() as connection:
-        connection.query(
+        connection.execute(
             "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
             (str(uuid4()), message_id, "thumbs_up"),
         )
@@ -198,21 +212,10 @@ async def feedback_thumbs_down(
     message_id: str, current_user: User = Depends(get_current_user)
 ) -> None:
     with Database() as connection:
-        connection.query(
+        connection.execute(
             "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
             (str(uuid4()), message_id, "thumbs_down"),
         )
-
-
-############################################
-###                Other                 ###
-############################################
-
-
-@app.post("/index/documents")
-async def index_documents(chunks: List[Doc], bucket: str, storage_backend: StorageBackend) -> None:
-    """Index documents in a specified storage backend."""
-    store_documents(chunks, bucket, storage_backend)
 
 
 if __name__ == "__main__":

@@ -17,6 +17,6 @@ def get_conversation_buffer_memory(config, chat_id):
 def get_chat_message_history(chat_id):
     return SQLChatMessageHistory(
         session_id=chat_id,
-        connection_string=os.environ.get("DATABASE_CONNECTION_STRING"),
+        connection_string=os.environ.get("DATABASE_URL"),
         table_name=TABLE_NAME,
     )

@@ -23,7 +23,6 @@ vector_store_provider:
   model_source: Chroma
   persist_directory: vector_database/
   cleanup_mode: full
-  documents_to_retreive: 10
   collection_metadata:
     hnsw:space: cosine
   search_type: similarity
