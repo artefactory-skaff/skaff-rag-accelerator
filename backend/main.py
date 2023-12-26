@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List
 from uuid import uuid4
 from dotenv import load_dotenv
@@ -25,7 +26,7 @@ from backend.user_management import (
 )
 from backend.database import Database
 
-load_dotenv()
+
 app = FastAPI()
 logger = get_logger()
 
@@ -167,7 +168,7 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
         "message_id": message.id,
         "timestamp": message.timestamp,
     }
-    rag = RAG(logger=logger, context=context)
+    rag = RAG(config=Path(__file__).parent / "config.yaml", logger=logger, context=context)
     response = rag.generate_response(message)
 
     return StreamingResponse(streamed_llm_response(message.chat_id, response), media_type="text/event-stream")

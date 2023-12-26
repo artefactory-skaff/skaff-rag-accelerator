@@ -10,6 +10,7 @@ from langchain.prompts import (
 )
 from langchain.vectorstores import VectorStore
 
+from backend.config import RagConfig
 from backend.rag_components.llm import get_llm_model
 from backend.rag_components import prompts
 from backend.rag_components.logging_callback_handler import LoggingCallbackHandler
@@ -25,7 +26,7 @@ async def get_response_stream(chain: ConversationalRetrievalChain, query: str, s
     await run
 
 
-def get_answer_chain(config, docsearch: VectorStore, memory, streaming_callback_handler, logging_callback_handler: LoggingCallbackHandler = None) -> ConversationalRetrievalChain:
+def get_answer_chain(config: RagConfig, docsearch: VectorStore, memory, streaming_callback_handler, logging_callback_handler: LoggingCallbackHandler = None) -> ConversationalRetrievalChain:
     callbacks = [logging_callback_handler] if logging_callback_handler is not None else []
     
     condense_question_prompt = PromptTemplate.from_template(prompts.condense_history)
@@ -48,19 +49,13 @@ def get_answer_chain(config, docsearch: VectorStore, memory, streaming_callback_
         callbacks=callbacks
     )
 
-    reduced_qa_chain = ReduceDocumentsChain(
-        combine_documents_chain=stuffed_qa_chain,
-        callbacks=callbacks
-    )
-
     chain = ConversationalRetrievalChain(
         question_generator=condense_question_chain,
-        retriever=docsearch.as_retriever(search_type=config["vector_store_provider"]["search_type"], search_kwargs=config["vector_store_provider"]["search_options"]),
+        retriever=docsearch.as_retriever(search_type=config.vector_store.retreiver_search_type, search_kwargs=config.vector_store.retreiver_config),
         memory=memory,
-        max_tokens_limit=3000,
-        combine_docs_chain=reduced_qa_chain,
+        max_tokens_limit=config.max_tokens_limit,
+        combine_docs_chain=stuffed_qa_chain,
         callbacks=callbacks
     )
 
     return chain
-

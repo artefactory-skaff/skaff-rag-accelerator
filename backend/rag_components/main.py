@@ -1,18 +1,20 @@
 from logging import Logger
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
-from dotenv import load_dotenv
+
 from langchain.docstore.document import Document
 from langchain.vectorstores.utils import filter_complex_metadata
 from langchain.callbacks import AsyncIteratorCallbackHandler
 from backend.rag_components.chain import get_answer_chain, get_response_stream
 from langchain.indexes import SQLRecordManager, index
+from langchain.chat_models.base import BaseChatModel
 from langchain.vectorstores import VectorStore
+from langchain.schema.embeddings import Embeddings
 
 
-from backend.rag_components.config_renderer import get_config
+from backend.config import RagConfig
 from backend.model import Message
 from backend.rag_components.chat_message_history import get_conversation_buffer_memory
 from backend.rag_components.document_loader import get_documents
@@ -21,20 +23,19 @@ from backend.rag_components.llm import get_llm_model
 from backend.rag_components.logging_callback_handler import LoggingCallbackHandler
 from backend.rag_components.vector_store import get_vector_store
 
-load_dotenv()
-
 
 class RAG:
-    def __init__(self, config_file_path: Path = None, logger: Logger = None, context: dict = None):
-        if config_file_path is None:
-            config_file_path = Path(__file__).parents[1]
+    def __init__(self, config: Union[Path, RagConfig], logger: Logger = None, context: dict = None):
+        if isinstance(config, RagConfig):
+            self.config = config
+        else:
+            self.config = RagConfig.from_yaml(config)
 
         self.logger = logger
         self.context = context
 
-        self.config = get_config(config_file_path)
-        self.llm = get_llm_model(self.config)
-        self.embeddings = get_embedding_model(self.config)
+        self.llm: BaseChatModel = get_llm_model(self.config)
+        self.embeddings: Embeddings = get_embedding_model(self.config)
         self.vector_store: VectorStore = get_vector_store(self.embeddings, self.config)
 
     def generate_response(self, message: Message):
@@ -52,14 +53,14 @@ class RAG:
 
     def load_documents(self, documents: List[Document]):
         record_manager = SQLRecordManager(
-            namespace="vector_store/my_docs", db_url=os.environ.get("DATABASE_URL")
+            namespace="vector_store/my_docs", db_url=self.config.database.database_url
         )
         record_manager.create_schema()
         indexing_output = index(
             documents,
             record_manager,
             self.vector_store,
-            cleanup=self.config["vector_store_provider"]["cleanup_mode"],
+            cleanup=self.config.vector_store_config.insertion_mode,
             source_id_key="source",
         )
         self.logger.info({"event": "load_documents", **indexing_output})
