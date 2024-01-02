@@ -2,6 +2,7 @@ from logging import Logger
 import os
 from typing import Optional, Any
 from pathlib import Path
+from dotenv import load_dotenv
 
 import sqlglot
 from dbutils.pooled_db import PooledDB
@@ -86,3 +87,11 @@ class Database:
             return PooledDB(creator=pyodbc, dsn=self.connection_string.replace("sqlserver://", ""), maxconnections=5)
         else:
             raise ValueError("Unsupported database type")
+
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    with Database(os.getenv("DATABASE_URL")) as db:
+        db.execute("DELETE FROM user WHERE email IN ('alexis')")
+        db.execute("DELETE FROM chat WHERE user_id IN ('alexis')")

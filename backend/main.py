@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List
 from uuid import uuid4
-from dotenv import load_dotenv
 
 
 from fastapi import Depends, FastAPI, HTTPException, status
@@ -13,7 +12,7 @@ from backend.logger import get_logger
 
 
 from backend.model import Message
-from backend.rag_components.main import RAG
+from backend.rag_components.rag import RAG
 from backend.user_management import (
     ALGORITHM,
     SECRET_KEY,
@@ -32,11 +31,6 @@ logger = get_logger()
 
 with Database() as connection:
     connection.initialize_schema()
-
-
-############################################
-###           Authentication             ###
-############################################
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -59,6 +53,139 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         return user
     except JWTError:
         raise credentials_exception
+
+
+############################################
+###               Chat                   ###
+############################################
+
+@app.post("/chat/new")
+async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
+    chat_id = str(uuid4())
+    timestamp = datetime.now().isoformat()
+    user_id = current_user.email
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO chat (id, timestamp, user_id) VALUES (?, ?, ?)",
+            (chat_id, timestamp, user_id),
+        )
+    return {"chat_id": chat_id}
+    
+
+@app.post("/chat/{chat_id}/user_message")
+async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
+            (message.id, message.timestamp, message.chat_id, message.sender, message.content),
+        )
+    
+    context = {
+        "user": current_user.email,
+        "chat_id": message.chat_id,
+        "message_id": message.id,
+        "timestamp": message.timestamp,
+    }
+    rag = RAG(config=Path(__file__).parent / "config.yaml", logger=logger, context=context)
+    response = rag.async_generate_response(message)
+
+    return StreamingResponse(streamed_llm_response(message.chat_id, response), media_type="text/event-stream")
+
+
+@app.post("/chat/regenerate")
+async def chat_regenerate(current_user: User = Depends(get_current_user)) -> dict:
+    """Regenerate a chat session for the current user."""
+    pass
+
+
+@app.get("/chat/list")
+async def chat_list(current_user: User = Depends(get_current_user)) -> List[dict]:
+    chats = []
+    with Database() as connection:
+        result = connection.execute(
+            "SELECT id, timestamp FROM chat WHERE user_id = ? ORDER BY timestamp DESC",
+            (current_user.email,),
+        )
+        chats = [{"id": row[0], "timestamp": row[1]} for row in result]
+    return chats
+
+
+@app.get("/chat/{chat_id}")
+async def chat(chat_id: str, current_user: User = Depends(get_current_user)) -> dict:
+    messages: List[Message] = []
+    with Database() as connection:
+        result = connection.execute(
+            "SELECT id, timestamp, chat_id, sender, content FROM message WHERE chat_id = ? ORDER BY timestamp ASC",
+            (chat_id,),
+        )
+        for row in result:
+            message = Message(
+                id=row[0],
+                timestamp=row[1],
+                chat_id=row[2],
+                sender=row[3],
+                content=row[4]
+            )
+            messages.append(message)
+    return {"chat_id": chat_id, "messages": [message.model_dump() for message in messages]}
+
+
+async def streamed_llm_response(chat_id, answer_chain):
+    full_response = ""
+    async for data in answer_chain:
+        full_response += data
+        yield data.encode("utf-8")
+
+    model_response = Message(
+        id=str(uuid4()),
+        timestamp=datetime.now().isoformat(),
+        chat_id=chat_id,
+        sender="assistant",
+        content=full_response,
+    )
+
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
+            (
+                model_response.id,
+                model_response.timestamp,
+                model_response.chat_id,
+                model_response.sender,
+                model_response.content,
+            ),
+        )
+
+
+############################################
+###               Feedback               ###
+############################################
+
+@app.post("/feedback/{message_id}/thumbs_up")
+async def feedback_thumbs_up(
+    message_id: str, current_user: User = Depends(get_current_user)
+) -> None:
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
+            (str(uuid4()), message_id, "thumbs_up"),
+        )
+
+
+@app.post("/feedback/{message_id}/thumbs_down")
+async def feedback_thumbs_down(
+    message_id: str, current_user: User = Depends(get_current_user)
+) -> None:
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
+            (str(uuid4()), message_id, "thumbs_down"),
+        )
+
+
+############################################
+###           Authentication             ###
+############################################
 
 
 @app.post("/user/signup")
@@ -105,118 +232,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
 
 @app.get("/user/me")
 async def user_me(current_user: User = Depends(get_current_user)) -> User:
-    """Get the current user's profile."""
     return current_user
-
-
-############################################
-###               Chat                   ###
-############################################
-
-
-@app.post("/chat/new")
-async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
-    chat_id = str(uuid4())
-    timestamp = datetime.now().isoformat()
-    user_id = current_user.email
-    with Database() as connection:
-        connection.execute(
-            "INSERT INTO chat (id, timestamp, user_id) VALUES (?, ?, ?)",
-            (chat_id, timestamp, user_id),
-        )
-    return {"chat_id": chat_id}
-
-
-async def streamed_llm_response(chat_id, answer_chain):
-    full_response = ""
-    async for data in answer_chain:
-        full_response += data
-        yield data.encode("utf-8")
-
-    model_response = Message(
-        id=str(uuid4()),
-        timestamp=datetime.now().isoformat(),
-        chat_id=chat_id,
-        sender="assistant",
-        content=full_response,
-    )
-
-    with Database() as connection:
-        connection.execute(
-            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (
-                model_response.id,
-                model_response.timestamp,
-                model_response.chat_id,
-                model_response.sender,
-                model_response.content,
-            ),
-        )
-    
-
-@app.post("/chat/{chat_id}/user_message")
-async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
-    with Database() as connection:
-        connection.execute(
-            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (message.id, message.timestamp, message.chat_id, message.sender, message.content),
-        )
-    
-    context = {
-        "user": current_user.email,
-        "chat_id": message.chat_id,
-        "message_id": message.id,
-        "timestamp": message.timestamp,
-    }
-    rag = RAG(config=Path(__file__).parent / "config.yaml", logger=logger, context=context)
-    response = rag.generate_response(message)
-
-    return StreamingResponse(streamed_llm_response(message.chat_id, response), media_type="text/event-stream")
-
-
-@app.post("/chat/regenerate")
-async def chat_regenerate(current_user: User = Depends(get_current_user)) -> dict:
-    """Regenerate a chat session for the current user."""
-    pass
-
-
-@app.get("/chat/list")
-async def chat_list(current_user: User = Depends(get_current_user)) -> List[dict]:
-    """Get a list of chat sessions for the current user."""
-    pass
-
-
-@app.get("/chat/{chat_id}")
-async def chat(chat_id: str, current_user: User = Depends(get_current_user)) -> dict:
-    """Get details of a specific chat session."""
-    pass
-
-
-############################################
-###               Feedback               ###
-############################################
-
-
-@app.post("/feedback/{message_id}/thumbs_up")
-async def feedback_thumbs_up(
-    message_id: str, current_user: User = Depends(get_current_user)
-) -> None:
-    with Database() as connection:
-        connection.execute(
-            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
-            (str(uuid4()), message_id, "thumbs_up"),
-        )
-
-
-@app.post("/feedback/{message_id}/thumbs_down")
-async def feedback_thumbs_down(
-    message_id: str, current_user: User = Depends(get_current_user)
-) -> None:
-    with Database() as connection:
-        connection.execute(
-            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
-            (str(uuid4()), message_id, "thumbs_down"),
-        )
 
 
 if __name__ == "__main__":

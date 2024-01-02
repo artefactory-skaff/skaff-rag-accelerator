@@ -1,11 +1,7 @@
 LLMConfig: &LLMConfig
-  source: "AzureChatOpenAI"
+  source: "ChatVertexAI"
   source_config:
-    openai_api_type: "azure"
-    openai_api_key: {{ OPENAI_API_KEY }}
-    openai_api_base: "https://poc-genai-gpt4.openai.azure.com/"
-    openai_api_version: "2023-07-01-preview"
-    deployment_name: "gpt4v"
+    model_name: google/gemini-pro
   temperature: 0.1
 
 VectorStoreConfig: &VectorStoreConfig

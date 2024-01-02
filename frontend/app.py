@@ -7,10 +7,9 @@ from PIL import Image
 
 from frontend.lib.auth import auth
 from frontend.lib.chat import chat
+from frontend.lib.sidebar import sidebar
 
 load_dotenv()
-embedding_api_base = os.getenv("EMBEDDING_OPENAI_API_BASE")
-embedding_api_key = os.getenv("EMBEDDING_API_KEY")
 FASTAPI_URL = os.getenv("FASTAPI_URL", "localhost:8000")
 
 assets = Path(__file__).parent / "assets"
@@ -36,4 +35,5 @@ if __name__ == "__main__":
         Le backend du ChatBot est APéïsé ce qui permet une meilleure scalabilité et robustesse."
     )
 
+    sidebar()
     chat()
