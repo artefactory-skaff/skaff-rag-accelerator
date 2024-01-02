@@ -40,8 +40,9 @@ def login_form() -> tuple[bool, Optional[str]]:
                 session = create_session()
                 session = authenticate_session(session, token)
             else:
-                st.error("Wrong authent")
+                st.error("Failed authentication")
             st.session_state["session"] = session
+            st.session_state["email"] = username
             return session
 
 
@@ -59,8 +60,9 @@ def signup_form() -> tuple[bool, Optional[str]]:
                 session = create_session()
                 auth_session = authenticate_session(session, token)
             else:
-                st.error("Failed to signing up")
+                st.error("Failed signing up")
             st.session_state["session"] = auth_session
+            st.session_state["email"] = username
             return auth_session
 
 

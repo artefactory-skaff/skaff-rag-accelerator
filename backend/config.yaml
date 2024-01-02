@@ -1,30 +1,46 @@
-llm_provider_config:
-  openai_api_type: azure
-  openai_api_base: https://poc-genai-gpt4.openai.azure.com/
-  openai_api_version: 2023-07-01-preview
-  openai_api_key: {{ OPENAI_API_KEY }}
+# LLMConfig: &LLMConfig
+#  source: ChatVertexAI
+#  source_config:
+#    model_name: gemini-pro
+#  temperature: 0.1
 
-llm_model_config:
-  model_source: AzureChatOpenAI
-  deployment_name: gpt4v
-  temperature: 0.1
-  streaming: true
-  verbose: true
+LLMConfig: &LLMConfig
+  source: AzureChatOpenAI
+  source_config:
+    openai_api_type: azure
+    openai_api_key: {{ OPENAI_API_KEY }}
+    openai_api_base: https://genai-ds.openai.azure.com/
+    openai_api_version: 2023-07-01-preview
+    deployment_name: gpt4
 
-embedding_provider_config:
-  openai_api_type: azure
-  openai_api_base: https://poc-openai-artefact.openai.azure.com/
-  openai_api_key: {{ EMBEDDING_API_KEY }}
+VectorStoreConfig: &VectorStoreConfig
+  source: Chroma
+  source_config:
+    persist_directory: vector_database/
+    collection_metadata:
+      hnsw:space: cosine
+  retreiver_search_type: similarity
+  retreiver_config:
+    top_k: 20
+    score_threshold: 0.5
+  insertion_mode: full
 
-embedding_model_config:
-  model_source: OpenAIEmbeddings
-  deployment: embeddings
-  chunk_size: 500
+EmbeddingModelConfig: &EmbeddingModelConfig
+  source: OpenAIEmbeddings
+  source_config:
+    openai_api_type: azure
+    openai_api_key: {{ EMBEDDING_API_KEY }}
+    openai_api_base: https://poc-openai-artefact.openai.azure.com/
+    deployment: embeddings
+    chunk_size: 500
 
-vector_store_provider:
-  model_source: Chroma
-  persist_directory: vector_database/
+DatabaseConfig: &DatabaseConfig
+  database_url: {{ DATABASE_URL }}
 
-chat_message_history_config:
-  source: ChatMessageHistory
-  window_size: 5
+RagConfig:
+  llm: *LLMConfig
+  vector_store: *VectorStoreConfig
+  embedding_model: *EmbeddingModelConfig
+  database: *DatabaseConfig
+  chat_history_window_size: 5
+  max_tokens_limit: 3000

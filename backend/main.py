@@ -3,14 +3,16 @@ from pathlib import Path
 from typing import List
 from uuid import uuid4
 
+
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
+from backend.logger import get_logger
 
-from backend.config_renderer import get_config
-from backend.document_store import StorageBackend, store_documents
-from backend.model import Doc, Message
-from backend.rag_components.document_loader import generate_response
+
+from backend.model import Message
+from backend.rag_components.rag import RAG
 from backend.user_management import (
     ALGORITHM,
     SECRET_KEY,
@@ -21,20 +23,19 @@ from backend.user_management import (
     get_user,
     user_exists,
 )
-from database.database import Database
+from backend.database import Database
+
 
 app = FastAPI()
+logger = get_logger()
 
-
-############################################
-###           Authentication             ###
-############################################
+with Database() as connection:
+    connection.initialize_schema()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
-    """Get the current user by decoding the JWT token."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -42,10 +43,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("email")  # 'sub' is commonly used to store user identity
+        email: str = payload.get("email")
         if email is None:
             raise credentials_exception
-        # Here you should fetch the user from the database by user_id
+
         user = get_user(email)
         if user is None:
             raise credentials_exception
@@ -54,9 +55,147 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise credentials_exception
 
 
+############################################
+###               Chat                   ###
+############################################
+
+@app.post("/chat/new")
+async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
+    chat_id = str(uuid4())
+    timestamp = datetime.now().isoformat()
+    user_id = current_user.email
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO chat (id, timestamp, user_id) VALUES (?, ?, ?)",
+            (chat_id, timestamp, user_id),
+        )
+    return {"chat_id": chat_id}
+    
+
+@app.post("/chat/{chat_id}/user_message")
+async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
+            (message.id, message.timestamp, message.chat_id, message.sender, message.content),
+        )
+    
+    context = {
+        "user": current_user.email,
+        "chat_id": message.chat_id,
+        "message_id": message.id,
+        "timestamp": message.timestamp,
+    }
+    rag = RAG(config=Path(__file__).parent / "config.yaml", logger=logger, context=context)
+    response = rag.async_generate_response(message)
+
+    return StreamingResponse(async_llm_response(message.chat_id, response), media_type="text/event-stream")
+
+
+@app.post("/chat/regenerate")
+async def chat_regenerate(current_user: User = Depends(get_current_user)) -> dict:
+    """Regenerate a chat session for the current user."""
+    pass
+
+
+@app.get("/chat/list")
+async def chat_list(current_user: User = Depends(get_current_user)) -> List[dict]:
+    chats = []
+    with Database() as connection:
+        result = connection.execute(
+            "SELECT id, timestamp FROM chat WHERE user_id = ? ORDER BY timestamp DESC",
+            (current_user.email,),
+        )
+        chats = [{"id": row[0], "timestamp": row[1]} for row in result]
+    return chats
+
+
+@app.get("/chat/{chat_id}")
+async def chat(chat_id: str, current_user: User = Depends(get_current_user)) -> dict:
+    messages: List[Message] = []
+    with Database() as connection:
+        result = connection.execute(
+            "SELECT id, timestamp, chat_id, sender, content FROM message WHERE chat_id = ? ORDER BY timestamp ASC",
+            (chat_id,),
+        )
+        for row in result:
+            message = Message(
+                id=row[0],
+                timestamp=row[1],
+                chat_id=row[2],
+                sender=row[3],
+                content=row[4]
+            )
+            messages.append(message)
+    return {"chat_id": chat_id, "messages": [message.model_dump() for message in messages]}
+
+
+async def async_llm_response(chat_id, answer_chain):
+    full_response = ""
+    response_id = str(uuid4())
+    try:
+        async for data in answer_chain:
+            full_response += data
+            yield data.encode("utf-8")
+    except Exception as e:
+        logger.error(f"Error generating response for chat {chat_id}: {e}")
+        full_response = f"Sorry, there was an error generating a response. Please contact an administrator and tell them the following error code: {response_id}, and message: {str(e)}"
+        yield full_response.encode("utf-8")
+
+    model_response = Message(
+        id=response_id,
+        timestamp=datetime.now().isoformat(),
+        chat_id=chat_id,
+        sender="assistant",
+        content=full_response,
+    )
+
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
+            (
+                model_response.id,
+                model_response.timestamp,
+                model_response.chat_id,
+                model_response.sender,
+                model_response.content,
+            ),
+        )
+
+
+############################################
+###               Feedback               ###
+############################################
+
+@app.post("/feedback/{message_id}/thumbs_up")
+async def feedback_thumbs_up(
+    message_id: str, current_user: User = Depends(get_current_user)
+) -> None:
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
+            (str(uuid4()), message_id, "thumbs_up"),
+        )
+
+
+@app.post("/feedback/{message_id}/thumbs_down")
+async def feedback_thumbs_down(
+    message_id: str, current_user: User = Depends(get_current_user)
+) -> None:
+    with Database() as connection:
+        connection.execute(
+            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
+            (str(uuid4()), message_id, "thumbs_down"),
+        )
+
+
+############################################
+###           Authentication             ###
+############################################
+
+
 @app.post("/user/signup")
 async def signup(user: User) -> dict:
-    """Sign up a new user."""
     if user_exists(user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"User {user.email} already registered"
@@ -68,7 +207,6 @@ async def signup(user: User) -> dict:
 
 @app.delete("/user/")
 async def delete_user(current_user: User = Depends(get_current_user)) -> dict:
-    """Delete an existing user."""
     email = current_user.email
     try:
         user = get_user(email)
@@ -86,7 +224,6 @@ async def delete_user(current_user: User = Depends(get_current_user)) -> dict:
 
 @app.post("/user/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
-    """Log in a user and return an access token."""
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -101,114 +238,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
 
 @app.get("/user/me")
 async def user_me(current_user: User = Depends(get_current_user)) -> User:
-    """Get the current user's profile."""
     return current_user
-
-
-############################################
-###               Chat                   ###
-############################################
-
-
-@app.post("/chat/new")
-async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
-    chat_id = str(uuid4())
-    timestamp = datetime.now().isoformat()
-    user_id = current_user.email
-    with Database() as connection:
-        connection.query(
-            "INSERT INTO chat (id, timestamp, user_id) VALUES (?, ?, ?)",
-            (chat_id, timestamp, user_id),
-        )
-    return {"chat_id": chat_id}
-
-
-@app.post("/chat/{chat_id}/user_message")
-async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
-    with Database() as connection:
-        connection.query(
-            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (message.id, message.timestamp, message.chat_id, message.sender, message.content),
-        )
-
-    config = get_config()
-
-    model_response = Message(
-        id=str(uuid4()),
-        timestamp=datetime.now().isoformat(),
-        chat_id=message.chat_id,
-        sender="assistant",
-        content=response,
-    )
-
-    with Database() as connection:
-        connection.query(
-            "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (
-                model_response.id,
-                model_response.timestamp,
-                model_response.chat_id,
-                model_response.sender,
-                model_response.content,
-            ),
-        )
-    return {"message": model_response}
-
-
-@app.post("/chat/regenerate")
-async def chat_regenerate(current_user: User = Depends(get_current_user)) -> dict:
-    """Regenerate a chat session for the current user."""
-    pass
-
-
-@app.get("/chat/list")
-async def chat_list(current_user: User = Depends(get_current_user)) -> List[dict]:
-    """Get a list of chat sessions for the current user."""
-    pass
-
-
-@app.get("/chat/{chat_id}")
-async def chat(chat_id: str, current_user: User = Depends(get_current_user)) -> dict:
-    """Get details of a specific chat session."""
-    pass
-
-
-############################################
-###               Feedback               ###
-############################################
-
-
-@app.post("/feedback/{message_id}/thumbs_up")
-async def feedback_thumbs_up(
-    message_id: str, current_user: User = Depends(get_current_user)
-) -> None:
-    with Database() as connection:
-        connection.query(
-            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
-            (str(uuid4()), message_id, "thumbs_up"),
-        )
-
-
-@app.post("/feedback/{message_id}/thumbs_down")
-async def feedback_thumbs_down(
-    message_id: str, current_user: User = Depends(get_current_user)
-) -> None:
-    with Database() as connection:
-        connection.query(
-            "INSERT INTO feedback (id, message_id, feedback) VALUES (?, ?, ?)",
-            (str(uuid4()), message_id, "thumbs_down"),
-        )
-
-
-############################################
-###                Other                 ###
-############################################
-
-
-@app.post("/index/documents")
-async def index_documents(chunks: List[Doc], bucket: str, storage_backend: StorageBackend) -> None:
-    """Index documents in a specified storage backend."""
-    document_store.store_documents(chunks, bucket, storage_backend)
 
 
 if __name__ == "__main__":
