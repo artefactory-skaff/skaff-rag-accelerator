@@ -7,7 +7,7 @@ from typing import AsyncIterator, List, Union
 from langchain.docstore.document import Document
 from langchain.vectorstores.utils import filter_complex_metadata
 from langchain.callbacks import AsyncIteratorCallbackHandler
-from backend.rag_components.chain import get_answer_chain, get_response_stream
+from backend.rag_components.chain import get_answer_chain, async_get_response, stream_get_response
 from langchain.indexes import SQLRecordManager, index
 from langchain.chat_models.base import BaseChatModel
 from langchain.vectorstores import VectorStore
@@ -21,6 +21,7 @@ from backend.rag_components.document_loader import get_documents
 from backend.rag_components.embedding import get_embedding_model
 from backend.rag_components.llm import get_llm_model
 from backend.rag_components.logging_callback_handler import LoggingCallbackHandler
+from backend.rag_components.streaming_callback_handler import StreamingCallbackHandler
 from backend.rag_components.vector_store import get_vector_store
 
 
@@ -42,14 +43,22 @@ class RAG:
         loop = asyncio.get_event_loop()
         response_stream = self.async_generate_response(message)
         responses = loop.run_until_complete(self._collect_responses(response_stream))
-        return "".join(responses)
+        return "".join([str(response) for response in responses])
+    
+    def stream_generate_response(self, message: Message) -> AsyncIterator[str]:
+        memory = get_conversation_buffer_memory(self.config, message.chat_id)
+        streaming_callback_handler = StreamingCallbackHandler()
+        logging_callback_handler = LoggingCallbackHandler(self.logger, context=self.context)
+        answer_chain = get_answer_chain(self.config, self.vector_store, memory, streaming_callback_handler=streaming_callback_handler, logging_callback_handler=logging_callback_handler)
+        response_stream = stream_get_response(answer_chain, message.content, streaming_callback_handler)
+        return response_stream
     
     def async_generate_response(self, message: Message) -> AsyncIterator[str]:
         memory = get_conversation_buffer_memory(self.config, message.chat_id)
         streaming_callback_handler = AsyncIteratorCallbackHandler()
         logging_callback_handler = LoggingCallbackHandler(self.logger, context=self.context)
         answer_chain = get_answer_chain(self.config, self.vector_store, memory, streaming_callback_handler=streaming_callback_handler, logging_callback_handler=logging_callback_handler)
-        response_stream = get_response_stream(answer_chain, message.content, streaming_callback_handler)
+        response_stream = async_get_response(answer_chain, message.content, streaming_callback_handler)
         return response_stream
     
     def load_file(self, file_path: Path) -> List[Document]:

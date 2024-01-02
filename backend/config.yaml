@@ -1,28 +1,37 @@
+# LLMConfig: &LLMConfig
+#  source: ChatVertexAI
+#  source_config:
+#    model_name: gemini-pro
+#  temperature: 0.1
+
 LLMConfig: &LLMConfig
-  source: "ChatVertexAI"
+  source: AzureChatOpenAI
   source_config:
-    model_name: google/gemini-pro
-  temperature: 0.1
+    openai_api_type: azure
+    openai_api_key: {{ OPENAI_API_KEY }}
+    openai_api_base: https://genai-ds.openai.azure.com/
+    openai_api_version: 2023-07-01-preview
+    deployment_name: gpt4
 
 VectorStoreConfig: &VectorStoreConfig
-  source: "Chroma"
+  source: Chroma
   source_config:
-    persist_directory: "vector_database/"
+    persist_directory: vector_database/
     collection_metadata:
-      hnsw:space: "cosine"
-  retreiver_search_type: "similarity"
+      hnsw:space: cosine
+  retreiver_search_type: similarity
   retreiver_config:
     top_k: 20
     score_threshold: 0.5
-  insertion_mode: "full"
+  insertion_mode: full
 
 EmbeddingModelConfig: &EmbeddingModelConfig
-  source: "OpenAIEmbeddings"
+  source: OpenAIEmbeddings
   source_config:
-    openai_api_type: "azure"
+    openai_api_type: azure
     openai_api_key: {{ EMBEDDING_API_KEY }}
-    openai_api_base: "https://poc-openai-artefact.openai.azure.com/"
-    deployment: "embeddings"
+    openai_api_base: https://poc-openai-artefact.openai.azure.com/
+    deployment: embeddings
     chunk_size: 500
 
 DatabaseConfig: &DatabaseConfig

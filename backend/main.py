@@ -89,7 +89,7 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
     rag = RAG(config=Path(__file__).parent / "config.yaml", logger=logger, context=context)
     response = rag.async_generate_response(message)
 
-    return StreamingResponse(streamed_llm_response(message.chat_id, response), media_type="text/event-stream")
+    return StreamingResponse(async_llm_response(message.chat_id, response), media_type="text/event-stream")
 
 
 @app.post("/chat/regenerate")
@@ -130,14 +130,20 @@ async def chat(chat_id: str, current_user: User = Depends(get_current_user)) -> 
     return {"chat_id": chat_id, "messages": [message.model_dump() for message in messages]}
 
 
-async def streamed_llm_response(chat_id, answer_chain):
+async def async_llm_response(chat_id, answer_chain):
     full_response = ""
-    async for data in answer_chain:
-        full_response += data
-        yield data.encode("utf-8")
+    response_id = str(uuid4())
+    try:
+        async for data in answer_chain:
+            full_response += data
+            yield data.encode("utf-8")
+    except Exception as e:
+        logger.error(f"Error generating response for chat {chat_id}: {e}")
+        full_response = f"Sorry, there was an error generating a response. Please contact an administrator and tell them the following error code: {response_id}, and message: {str(e)}"
+        yield full_response.encode("utf-8")
 
     model_response = Message(
-        id=str(uuid4()),
+        id=response_id,
         timestamp=datetime.now().isoformat(),
         chat_id=chat_id,
         sender="assistant",

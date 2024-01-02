@@ -1,8 +1,9 @@
 import asyncio
+from threading import Thread
+from time import sleep
+
 from langchain.chains import ConversationalRetrievalChain, LLMChain
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-from langchain.chains.combine_documents.reduce import ReduceDocumentsChain
-from langchain.chat_models.base import SystemMessage
 from langchain.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
@@ -17,7 +18,7 @@ from backend.rag_components.logging_callback_handler import LoggingCallbackHandl
 
 
 
-async def get_response_stream(chain: ConversationalRetrievalChain, query: str, streaming_callback_handler) -> str:
+async def async_get_response(chain: ConversationalRetrievalChain, query: str, streaming_callback_handler) -> str:
     run = asyncio.create_task(chain.arun({"question": query}))
 
     async for token in streaming_callback_handler.aiter():
@@ -26,18 +27,30 @@ async def get_response_stream(chain: ConversationalRetrievalChain, query: str, s
     await run
 
 
-def get_answer_chain(config: RagConfig, docsearch: VectorStore, memory, streaming_callback_handler, logging_callback_handler: LoggingCallbackHandler = None) -> ConversationalRetrievalChain:
+def stream_get_response(chain: ConversationalRetrievalChain, query: str, streaming_callback_handler) -> str:
+    thread = Thread(target=lambda chain, query: chain.run({"question": query}), args=(chain, query))
+    thread.start()
+
+    while thread.is_alive() or not streaming_callback_handler.queue.empty():
+        if not streaming_callback_handler.queue.empty():
+            yield streaming_callback_handler.queue.get()
+        else:
+            sleep(0.1)
+
+    thread.join()
+
+def get_answer_chain(config: RagConfig, docsearch: VectorStore, memory, streaming_callback_handler = None, logging_callback_handler: LoggingCallbackHandler = None) -> ConversationalRetrievalChain:
     callbacks = [logging_callback_handler] if logging_callback_handler is not None else []
-    
+    streaming_callback = [streaming_callback_handler] if streaming_callback_handler is not None else []
+
     condense_question_prompt = PromptTemplate.from_template(prompts.condense_history)
     condense_question_chain = LLMChain(llm=get_llm_model(config), prompt=condense_question_prompt, callbacks=callbacks)
 
     messages = [
-        SystemMessage(content=prompts.rag_system_prompt),
         HumanMessagePromptTemplate.from_template(prompts.respond_to_question),
     ]
     question_answering_prompt = ChatPromptTemplate(messages=messages)
-    streaming_llm = get_llm_model(config, callbacks=[streaming_callback_handler] + callbacks)
+    streaming_llm = get_llm_model(config, callbacks=streaming_callback + callbacks)
     question_answering_chain = LLMChain(llm=streaming_llm, prompt=question_answering_prompt, callbacks=callbacks)
 
     context_with_docs_prompt = PromptTemplate(template=prompts.document_context, input_variables=["page_content", "source"])
