@@ -119,6 +119,8 @@ dataclasses-json==0.6.3
     # via
     #   langchain
     #   unstructured
+dbutils==3.0.3
+    # via -r requirements.in
 decorator==5.1.1
     # via gcsfs
 distlib==0.3.8
@@ -221,6 +223,8 @@ huggingface-hub==0.19.4
     #   transformers
 humanfriendly==10.0
     # via coloredlogs
+humanize==4.9.0
+    # via -r requirements.in
 identify==2.5.33
     # via pre-commit
 idna==3.6
@@ -416,7 +420,9 @@ pydeck==0.8.1b0
 pygments==2.17.2
     # via rich
 pyjwt[crypto]==2.8.0
-    # via msal
+    # via
+    #   msal
+    #   pyjwt
 pypdf==3.17.2
     # via -r requirements.in
 pypika==0.48.9
@@ -534,6 +540,8 @@ soupsieve==2.5
     # via beautifulsoup4
 sqlalchemy==2.0.23
     # via langchain
+sqlglot==20.5.0
+    # via -r requirements.in
 starlette==0.27.0
     # via fastapi
 stevedore==5.1.0

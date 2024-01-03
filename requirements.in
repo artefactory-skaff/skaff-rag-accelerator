@@ -35,3 +35,6 @@ trubrics[streamlit]
 uvicorn
 apify-client
 sentence_transformers
+sqlglot
+dbutils
+humanize
