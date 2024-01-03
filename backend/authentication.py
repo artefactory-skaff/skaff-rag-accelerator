@@ -19,13 +19,13 @@ class User(BaseModel):
 def create_user(user: User) -> None:
     with Database() as connection:
         connection.execute(
-            "INSERT INTO user (email, password) VALUES (?, ?)", (user.email, user.password)
+            "INSERT INTO users (email, password) VALUES (?, ?)", (user.email, user.password)
         )
 
 
 def get_user(email: str) -> User:
     with Database() as connection:
-        user_row = connection.execute("SELECT * FROM user WHERE email = ?", (email,))
+        user_row = connection.execute("SELECT * FROM users WHERE email = ?", (email,))
         for row in user_row:
             return User(**row)
         raise Exception("User not found")

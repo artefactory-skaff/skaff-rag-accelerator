@@ -19,19 +19,19 @@ class User(BaseModel):
 def create_user(user: User) -> None:
     with Database() as connection:
         connection.execute(
-            "INSERT INTO user (email, password) VALUES (?, ?)", (user.email, user.password)
+            "INSERT INTO users (email, password) VALUES (?, ?)", (user.email, user.password)
         )
 
 
 def user_exists(email: str) -> bool:
     with Database() as connection:
-        result = connection.fetchone("SELECT 1 FROM user WHERE email = ?", (email,))
+        result = connection.fetchone("SELECT 1 FROM users WHERE email = ?", (email,))
         return bool(result)
 
 
 def get_user(email: str) -> Optional[User]:
     with Database() as connection:
-        user_row = connection.fetchone("SELECT * FROM user WHERE email = ?", (email,))
+        user_row = connection.fetchone("SELECT * FROM users WHERE email = ?", (email,))
         if user_row:
             return User(email=user_row[0], password=user_row[1])
         return None
@@ -39,7 +39,7 @@ def get_user(email: str) -> Optional[User]:
 
 def delete_user(email: str) -> None:
     with Database() as connection:
-        connection.execute("DELETE FROM user WHERE email = ?", (email,))
+        connection.execute("DELETE FROM users WHERE email = ?", (email,))
 
 
 def authenticate_user(username: str, password: str) -> Optional[User]:

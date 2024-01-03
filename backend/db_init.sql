@@ -4,30 +4,30 @@
 -- Paste here
 -- Replace "CREATE TABLE" with "CREATE TABLE IF NOT EXISTS"
 
-CREATE TABLE IF NOT EXISTS "user" (
-    "email" TEXT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS "users" (
+    "email" VARCHAR(255) PRIMARY KEY,
     "password" TEXT
 );
 
 CREATE TABLE IF NOT EXISTS "chat" (
-    "id" TEXT PRIMARY KEY,
+    "id" VARCHAR(255) PRIMARY KEY,
     "timestamp" DATETIME,
-    "user_id" TEXT,
-    FOREIGN KEY ("user_id") REFERENCES "user" ("email")
+    "user_id" VARCHAR(255),
+    FOREIGN KEY ("user_id") REFERENCES "users" ("email")
 );
 
 CREATE TABLE IF NOT EXISTS "message" (
-    "id" TEXT PRIMARY KEY,
+    "id" VARCHAR(255) PRIMARY KEY,
     "timestamp" DATETIME,
-    "chat_id" TEXT,
+    "chat_id" VARCHAR(255),
     "sender" TEXT,
     "content" TEXT,
     FOREIGN KEY ("chat_id") REFERENCES "chat" ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "feedback" (
-    "id" TEXT PRIMARY KEY,
-    "message_id" TEXT,
+    "id" VARCHAR(255) PRIMARY KEY,
+    "message_id" VARCHAR(255),
     "feedback" TEXT,
     FOREIGN KEY ("message_id") REFERENCES "message" ("id")
 );
