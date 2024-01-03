@@ -75,6 +75,7 @@ class Database:
     def _create_pool(self) -> PooledDB:
         if self.connection_string.startswith("sqlite:///"):
             import sqlite3
+            Path(self.connection_string.replace("sqlite:///", "")).parent.mkdir(parents=True, exist_ok=True)
             return PooledDB(creator=sqlite3, database=self.connection_string.replace("sqlite:///", ""), maxconnections=5)
         elif self.connection_string.startswith("postgres://"):
             import psycopg2

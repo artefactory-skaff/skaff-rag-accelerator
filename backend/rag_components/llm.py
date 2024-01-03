@@ -12,4 +12,5 @@ def get_llm_model(config: RagConfig, callbacks: List[BaseCallbackHandler] = []):
     }
     kwargs["streaming"] = True
     kwargs["callbacks"] = callbacks
+
     return llm_spec(**kwargs)

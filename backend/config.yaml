@@ -4,6 +4,14 @@
 #    model_name: gemini-pro
 #  temperature: 0.1
 
+# LLMConfig: &LLMConfig
+#     source: GPT4All
+#     source_config:
+#       model: /Users/alexis.vialaret/vscode_projects/skaff-rag-accelerator/data/mistral-7b-openorca.Q4_0.gguf
+#       n_ctx: 1024
+#       backend: gptj
+#       verbose: false
+
 LLMConfig: &LLMConfig
   source: AzureChatOpenAI
   source_config:
@@ -44,3 +52,4 @@ RagConfig:
   database: *DatabaseConfig
   chat_history_window_size: 5
   max_tokens_limit: 3000
+  response_mode: stream

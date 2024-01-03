@@ -8,7 +8,7 @@ from backend.config import RagConfig
 TABLE_NAME = "message_history"
 
 
-def get_conversation_buffer_memory(config: RagConfig, chat_id):
+def get_conversation_buffer_memory(config: RagConfig, chat_id) -> ConversationBufferWindowMemory:
     return ConversationBufferWindowMemory(
         memory_key="chat_history",
         chat_memory=get_chat_message_history(config, chat_id),

@@ -1,5 +1,8 @@
+import asyncio
 from datetime import datetime, timedelta
+import inspect
 from pathlib import Path
+import traceback
 from typing import List
 from uuid import uuid4
 
@@ -8,9 +11,9 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
+from langchain_core.messages.ai import AIMessage
+
 from backend.logger import get_logger
-
-
 from backend.model import Message
 from backend.rag_components.rag import RAG
 from backend.user_management import (
@@ -87,9 +90,8 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
         "timestamp": message.timestamp,
     }
     rag = RAG(config=Path(__file__).parent / "config.yaml", logger=logger, context=context)
-    response = rag.async_generate_response(message)
-
-    return StreamingResponse(async_llm_response(message.chat_id, response), media_type="text/event-stream")
+    response = rag.generate_response(message)
+    return StreamingResponse(stream_response(message.chat_id, response), media_type="text/event-stream")
 
 
 @app.post("/chat/regenerate")
@@ -130,36 +132,35 @@ async def chat(chat_id: str, current_user: User = Depends(get_current_user)) -> 
     return {"chat_id": chat_id, "messages": [message.model_dump() for message in messages]}
 
 
-async def async_llm_response(chat_id, answer_chain):
+async def stream_response(chat_id: str, response):
     full_response = ""
     response_id = str(uuid4())
     try:
-        async for data in answer_chain:
-            full_response += data
-            yield data.encode("utf-8")
+        if type(response) is AIMessage:
+            full_response = response.content
+            yield full_response.encode("utf-8")
+        elif inspect.isasyncgen(response):
+            async for data in response:
+                full_response += data.content
+                yield data.content.encode("utf-8")
+        else:
+            for part in response:
+                full_response += part.content
+                yield part.content.encode("utf-8")
+                await asyncio.sleep(0)
     except Exception as e:
-        logger.error(f"Error generating response for chat {chat_id}: {e}")
-        full_response = f"Sorry, there was an error generating a response. Please contact an administrator and tell them the following error code: {response_id}, and message: {str(e)}"
+        logger.error(f"Error generating response for chat {chat_id}: {e}", exc_info=True)
+        full_response = f"Sorry, there was an error generating a response. Please contact an administrator and provide them with the following error code: {response_id} \n\n {traceback.format_exc()}"
         yield full_response.encode("utf-8")
+    finally:
+        await log_response_to_db(chat_id, full_response)
 
-    model_response = Message(
-        id=response_id,
-        timestamp=datetime.now().isoformat(),
-        chat_id=chat_id,
-        sender="assistant",
-        content=full_response,
-    )
-
+async def log_response_to_db(chat_id: str, full_response: str):
+    response_id = str(uuid4())
     with Database() as connection:
         connection.execute(
             "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (
-                model_response.id,
-                model_response.timestamp,
-                model_response.chat_id,
-                model_response.sender,
-                model_response.content,
-            ),
+            (response_id, datetime.now().isoformat(), chat_id, "assistant", full_response),
         )
 
 

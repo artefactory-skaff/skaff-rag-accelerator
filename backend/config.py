@@ -65,6 +65,7 @@ class RagConfig:
     database:                 DatabaseConfig        = field(default_factory=DatabaseConfig)
     chat_history_window_size: int                   = 5
     max_tokens_limit:         int                   = 3000
+    response_mode:            str                   = "normal"
 
     @classmethod
     def from_yaml(cls, yaml_path: Path, env: dict = None):
