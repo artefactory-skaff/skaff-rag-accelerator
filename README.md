@@ -43,7 +43,11 @@ You should than be able to login and chat to the bot:
 
 ## Documentation
 
-To deep dive into under the hood, take a look at the documentation:
+To deep dive into under the hood, take a look at the documentation
+
+[On github pages](https://redesigned-umbrella-evz5np5.pages.github.io/)
+
+Or serve them locally:
 ```shell
 mkdocs serve
 ```
