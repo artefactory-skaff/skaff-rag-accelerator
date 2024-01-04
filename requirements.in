@@ -38,3 +38,6 @@ sentence_transformers
 sqlglot
 dbutils
 humanize
+mkdocs
+mkdocs-techdocs-core
+pymdown-extensions
