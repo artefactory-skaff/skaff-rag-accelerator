@@ -12,9 +12,27 @@ LLMConfig: &LLMConfig
   temperature: 0.1
 ```
 
+## Local llama2
+!!! info "You will first need to install and run Ollama"
+
+    [Download the Ollama application here](https://ollama.ai/download)
+
+    Ollama will automatically utilize the GPU on Apple devices.
+
+    ```shell
+    ollama run llama2
+    ```
+
+```yaml
+LLMConfig: &LLMConfig
+  source: ChatOllama
+  source_config:
+    model: llama2
+```
+
 ## Vertex AI gemini-pro
 
-!!! info "login to GCP"
+!!! info "You will first need to login to GCP"
 
     ```shell
     export PROJECT_ID=<gcp_project_id>

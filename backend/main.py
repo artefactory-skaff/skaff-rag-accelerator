@@ -11,7 +11,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
-from langchain_core.messages.ai import AIMessage
+from langchain_core.messages.ai import AIMessage, AIMessageChunk
 
 from backend.logger import get_logger
 from backend.model import Message
@@ -145,8 +145,10 @@ async def stream_response(chat_id: str, response):
                 yield data.content.encode("utf-8")
         else:
             for part in response:
-                full_response += part.content
-                yield part.content.encode("utf-8")
+                if isinstance(part, AIMessageChunk):
+                    part = part.content
+                full_response += part
+                yield part.encode("utf-8")
                 await asyncio.sleep(0)
     except Exception as e:
         logger.error(f"Error generating response for chat {chat_id}: {e}", exc_info=True)
