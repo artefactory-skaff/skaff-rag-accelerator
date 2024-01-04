@@ -1,0 +1,24 @@
+# This is only used for documentation generation in Roadie. It is not part of the vertex starter kit.
+
+site_name: GenAI RAG Accelerator
+repo_name: artefactory/skaff-rag-accelerator
+repo_url: https://github.com/artefactory/skaff-rag-accelerator
+
+plugins:
+  - techdocs-core
+  - search
+  - autorefs
+
+markdown_extensions:
+  - pymdownx.snippets:
+
+nav:
+  - Home: index.md
+  - Loading Docs in the RAG: loading_documents.md
+  - The RAG object: rag_object.md
+  - The RAGConfig object: rag_config.md
+  - Config cookbook:
+    - LLMs: recipe_llms_configs.md
+    - Vector Stores: recipe_vector_stores_configs.md
+    - Embedding Models: recipe_embedding_models_configs.md
+    - Databases: recipe_databases_configs.md

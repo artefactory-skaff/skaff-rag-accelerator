@@ -1,6 +1,5 @@
 # skaff-rag-accelerator 
 
-
 This is a starter kit to deploy a modularizable RAG locally or on the cloud (or across multiple clouds)
 
 ## Features
@@ -30,7 +29,7 @@ export DATABASE_URL="sqlite:///$(pwd)/database/db.sqlite3"  # For local develope
 
 Start the backend server locally
 ```shell
-python backend/main.py
+uvicorn backend.main:app
 ```
 
 Start the frontend demo
@@ -38,8 +37,8 @@ Start the frontend demo
 streamlit run frontend/app.py
 ```
 
-You should than be able to login and chat to the bot:
-![](docs/login_and_chat.gif)
+You should then be able to login and chat to the bot:
+![](login_and_chat.gif)
 
 
 ## Architecture
@@ -48,17 +47,16 @@ You should than be able to login and chat to the bot:
 
 The whole goal of this repo is to decouple the "computing and LLM querying" part from the "rendering a user interface" part. We do this with a typical 3-tier architecture.
 
-![](docs/3t_architecture.png)
+![](3t_architecture.png)
 
 - The [frontend](frontend) is the end user facing part. It reches out to the backend **ONLY** through the REST API. We provide a frontend demo here for convenience, but ultimately it could live in a completely different repo, and be written in a completely different language.
 - The [backend](backend) provides a REST API to abstract RAG functionalities. It handles calls to LLMs, tracks conversations and users, handles the state management using a db, and much more. To get the gist of the backend, look at the of the API: http://0.0.0.0:8000/docs
 - The [database](database) is only accessed by the backend and persists the state of the RAG application. [Explore the data model here.](https://dbdiagram.io/d/RAGAAS-63dbdcc6296d97641d7e07c8)
 
+The structure of the repo mirrors this architecture.
 
-## Documentation
+### The RAG
 
-To deep dive into under the hood, take a look at the documentation:
-```shell
-mkdocs serve
-```
-Then go to http://localhost:8000/
+![](rag_architecture.png)
+
+In the `backend` folder of the repository, you will find a `rag_components` directory that implements this architecture.
