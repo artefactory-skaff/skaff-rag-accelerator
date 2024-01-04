@@ -34,8 +34,8 @@ class VectorStoreConfig:
         }
     })
 
-    retreiver_search_type: str = "similarity"
-    retreiver_config: dict = field(default_factory=lambda: {
+    retriever_search_type: str = "similarity"
+    retriever_config: dict = field(default_factory=lambda: {
         "top_k": 20, 
         "score_threshold": 0.5
     })

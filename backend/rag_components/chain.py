@@ -20,7 +20,7 @@ def get_answer_chain(config: RagConfig, vector_store: VectorStore, memory: Conve
     llm_callbacks = [logging_callback_handler] if logging_callback_handler is not None else []
     llm = get_llm_model(config, callbacks=llm_callbacks)
 
-    retriever = vector_store.as_retriever(search_type=config.vector_store.retreiver_search_type, search_kwargs=config.vector_store.retreiver_config)
+    retriever = vector_store.as_retriever(search_type=config.vector_store.retriever_search_type, search_kwargs=config.vector_store.retriever_config)
 
     condense_question_prompt = PromptTemplate.from_template(prompts.condense_history)
     question_answering_prompt = ChatPromptTemplate.from_template(prompts.respond_to_question)

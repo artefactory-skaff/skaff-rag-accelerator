@@ -1,17 +1,3 @@
-# LLMConfig: &LLMConfig
-#  source: ChatVertexAI
-#  source_config:
-#    model_name: gemini-pro
-#  temperature: 0.1
-
-# LLMConfig: &LLMConfig
-#     source: GPT4All
-#     source_config:
-#       model: /Users/alexis.vialaret/vscode_projects/skaff-rag-accelerator/data/mistral-7b-openorca.Q4_0.gguf
-#       n_ctx: 1024
-#       backend: gptj
-#       verbose: false
-
 LLMConfig: &LLMConfig
   source: AzureChatOpenAI
   source_config:
@@ -27,10 +13,12 @@ VectorStoreConfig: &VectorStoreConfig
     persist_directory: vector_database/
     collection_metadata:
       hnsw:space: cosine
-  retreiver_search_type: similarity
-  retreiver_config:
+  
+  retriever_search_type: similarity
+  retriever_config:
     top_k: 20
     score_threshold: 0.5
+
   insertion_mode: full
 
 EmbeddingModelConfig: &EmbeddingModelConfig
