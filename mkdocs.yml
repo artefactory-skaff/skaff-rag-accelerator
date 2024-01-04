@@ -6,8 +6,6 @@ repo_url: https://github.com/artefactory/skaff-rag-accelerator
 
 plugins:
   - techdocs-core
-  - search
-  - autorefs
 
 markdown_extensions:
   - pymdownx.snippets:
