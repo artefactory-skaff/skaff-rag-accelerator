@@ -295,7 +295,10 @@ mergedeep==1.3.4
 mkdocs==1.5.3
     # via
     #   -r requirements.in
+    #   mkdocs-monorepo-plugin
     #   mkdocs-techdocs-core
+mkdocs-monorepo-plugin==1.1.0
+    # via -r requirements.in
 mkdocs-techdocs-core==0.0.3
     # via -r requirements.in
 monotonic==1.6
@@ -432,9 +435,7 @@ pydantic-core==2.14.5
 pydeck==0.8.1b0
     # via streamlit
 pygments==2.17.2
-    # via
-    #   mkdocs-techdocs-core
-    #   rich
+    # via rich
 pyjwt[crypto]==2.8.0
     # via msal
 pymdown-extensions==10.7
@@ -464,6 +465,8 @@ python-multipart==0.0.6
     # via -r requirements.in
 python-pptx==0.6.23
     # via -r requirements.in
+python-slugify==8.0.1
+    # via mkdocs-monorepo-plugin
 pytz==2023.3.post1
     # via pandas
 pyyaml==6.0.1
@@ -586,6 +589,8 @@ tenacity==8.2.3
     # via
     #   langchain
     #   streamlit
+text-unidecode==1.3
+    # via python-slugify
 threadpoolctl==3.2.0
     # via scikit-learn
 tiktoken==0.5.2
