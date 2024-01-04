@@ -1,4 +1,5 @@
 from langchain import embeddings
+
 from backend.config import RagConfig
 
 

@@ -1,11 +1,10 @@
 import asyncio
-from datetime import datetime, timedelta
 import inspect
-from pathlib import Path
 import traceback
+from datetime import datetime, timedelta
+from pathlib import Path
 from typing import List
 from uuid import uuid4
-
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -13,6 +12,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from langchain_core.messages.ai import AIMessage, AIMessageChunk
 
+from backend.database import Database
 from backend.logger import get_logger
 from backend.model import Message
 from backend.rag_components.rag import RAG
@@ -26,8 +26,6 @@ from backend.user_management import (
     get_user,
     user_exists,
 )
-from backend.database import Database
-
 
 app = FastAPI()
 logger = get_logger()
@@ -73,7 +71,7 @@ async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
             (chat_id, timestamp, user_id),
         )
     return {"chat_id": chat_id}
-    
+
 
 @app.post("/chat/{chat_id}/user_message")
 async def chat_prompt(message: Message, current_user: User = Depends(get_current_user)) -> dict:
@@ -82,7 +80,7 @@ async def chat_prompt(message: Message, current_user: User = Depends(get_current
             "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
             (message.id, message.timestamp, message.chat_id, message.sender, message.content),
         )
-    
+
     context = {
         "user": current_user.email,
         "chat_id": message.chat_id,

@@ -1,4 +1,4 @@
-It provides a unique interface to the RAG's functionalities. 
+It provides a unique interface to the RAG's functionalities.
 
 ## Using the `RAG` class directly:
 ```python
@@ -27,5 +27,3 @@ Out of the box, A RAG object is created from your configuration and used by the 
 The RAG class initializes key components (language model, embeddings, vector store), and generates responses to user messages using an answer chain.
 
 It also manages document loading and indexing based on configuration settings.
-
-

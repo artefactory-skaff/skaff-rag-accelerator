@@ -18,12 +18,12 @@ for file in data_directory.iterdir():
         rag.load_file(file)
 ```
 
-If you want more flexibility, you can use the `rag.load_documents` method which expects a list of `langchain.docstore.document` objects. 
+If you want more flexibility, you can use the `rag.load_documents` method which expects a list of `langchain.docstore.document` objects.
 
 **TODO: example**
 
 ## Document indexing
 
-The document loader maintains an index of the loaded documents. You can change it in the configuration of your RAG at `vector_store.insertion_mode` to `None`, `incremental`, or `full`. 
+The document loader maintains an index of the loaded documents. You can change it in the configuration of your RAG at `vector_store.insertion_mode` to `None`, `incremental`, or `full`.
 
 [Details of what that means here.](https://python.langchain.com/docs/modules/data_connection/indexing)

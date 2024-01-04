@@ -1,7 +1,6 @@
 import logging
 from logging import Logger
 
-
 # Implement your custom logging logic here. Eg. send logs to a cloud's logging tool.
 _logger_instance = None
 

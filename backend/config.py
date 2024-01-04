@@ -1,13 +1,13 @@
-from dataclasses import dataclass, field, is_dataclass
 import os
+from dataclasses import dataclass, field, is_dataclass
 from pathlib import Path
+
+import yaml
 from dotenv import load_dotenv
 from jinja2 import Template
-
 from langchain.chat_models.base import BaseChatModel
-from langchain.vectorstores import VectorStore
 from langchain.schema.embeddings import Embeddings
-import yaml
+from langchain.vectorstores import VectorStore
 
 load_dotenv()
 
@@ -28,7 +28,7 @@ class LLMConfig:
 class VectorStoreConfig:
     source: VectorStore | str = "Chroma"
     source_config: dict = field(default_factory=lambda: {
-        "persist_directory": "vector_database/", 
+        "persist_directory": "vector_database/",
         "collection_metadata": {
             "hnsw:space": "cosine"
         }
@@ -36,7 +36,7 @@ class VectorStoreConfig:
 
     retriever_search_type: str = "similarity"
     retriever_config: dict = field(default_factory=lambda: {
-        "top_k": 20, 
+        "top_k": 20,
         "score_threshold": 0.5
     })
 

@@ -3,14 +3,12 @@ from logging import Logger
 from pathlib import Path
 from typing import List, Union
 
-
-from langchain.docstore.document import Document
-from langchain.vectorstores.utils import filter_complex_metadata
-from langchain.indexes import SQLRecordManager, index
 from langchain.chat_models.base import BaseChatModel
-from langchain.vectorstores import VectorStore
+from langchain.docstore.document import Document
+from langchain.indexes import SQLRecordManager, index
 from langchain.schema.embeddings import Embeddings
-
+from langchain.vectorstores import VectorStore
+from langchain.vectorstores.utils import filter_complex_metadata
 
 from backend.config import RagConfig
 from backend.model import Message
@@ -49,12 +47,12 @@ class RAG:
         else:
             response = answer_chain.invoke({"question": message.content})
         return response
-    
+
     def load_file(self, file_path: Path) -> List[Document]:
         documents = get_documents(file_path, self.llm)
         filtered_documents = filter_complex_metadata(documents)
         return self.load_documents(filtered_documents)
-    
+
     def load_documents(self, documents: List[Document], insertion_mode: str = None):
         insertion_mode = insertion_mode or self.config.vector_store.insertion_mode
 

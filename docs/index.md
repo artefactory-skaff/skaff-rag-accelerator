@@ -1,4 +1,4 @@
-# skaff-rag-accelerator 
+# skaff-rag-accelerator
 
 This is a starter kit to deploy a modularizable RAG locally or on the cloud (or across multiple clouds)
 

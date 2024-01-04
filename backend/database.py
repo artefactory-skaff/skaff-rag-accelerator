@@ -1,12 +1,11 @@
-from logging import Logger
 import os
-from typing import Optional, Any
+from logging import Logger
 from pathlib import Path
-from dotenv import load_dotenv
+from typing import Any, Optional
 
 import sqlglot
 from dbutils.pooled_db import PooledDB
-from logging import Logger
+from dotenv import load_dotenv
 from sqlalchemy.engine.url import make_url
 
 from backend.logger import get_logger
@@ -84,7 +83,7 @@ class Database:
         except Exception as e:
             self.logger.exception("Schema initialization failed", exc_info=e)
             raise
-        
+
     def _create_pool(self) -> PooledDB:
         if self.connection_string.startswith("sqlite:///"):
             import sqlite3

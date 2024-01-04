@@ -1,6 +1,8 @@
 from multiprocessing import Queue
 from typing import AnyStr
+
 from langchain_core.callbacks.base import BaseCallbackHandler
+
 
 class StreamingCallbackHandler(BaseCallbackHandler):
     queue = Queue()

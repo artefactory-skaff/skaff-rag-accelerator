@@ -1,5 +1,7 @@
 import json
+
 from langchain.callbacks.base import BaseCallbackHandler
+
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -16,7 +18,7 @@ class LoggingCallbackHandler(BaseCallbackHandler):
     def _log_event(self, event_name, level, *args, **kwargs):
         if self.logger is None:
             return
-        
+
         log_data = {
             "event": event_name,
             "context": self.context,

@@ -1,13 +1,11 @@
 from operator import itemgetter
 
-from langchain.vectorstores.base import VectorStore
-from langchain_core.runnables import RunnablePassthrough, RunnableParallel
-from langchain.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain.schema import format_document
 from langchain.memory import ConversationBufferWindowMemory
-
-
+from langchain.prompts import ChatPromptTemplate, PromptTemplate
+from langchain.schema import format_document
+from langchain.vectorstores.base import VectorStore
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 
 from backend.config import RagConfig
 from backend.rag_components import prompts

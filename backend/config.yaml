@@ -9,7 +9,7 @@ VectorStoreConfig: &VectorStoreConfig
     persist_directory: vector_database/
     collection_metadata:
       hnsw:space: cosine
-  
+
   retriever_search_type: similarity
   retriever_config:
     top_k: 20
