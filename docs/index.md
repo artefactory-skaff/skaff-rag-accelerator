@@ -1,5 +1,6 @@
 # skaff-rag-accelerator
 
+
 This is a starter kit to deploy a modularizable RAG locally or on the cloud (or across multiple clouds)
 
 ## Features
@@ -22,6 +23,7 @@ pip install -r requirements.txt
 
 You will need to set some env vars, either in a .env file at the project root, or just by exporting them like so:
 ```shell
+export PYTHONPATH=.
 export OPENAI_API_KEY="xxx"  # API key used to query the LLM
 export EMBEDDING_API_KEY="xxx"  # API key used to query the embedding model
 export DATABASE_URL="sqlite:///$(pwd)/database/db.sqlite3"  # For local developement only. You will need a real, cloud-based SQL database URL for prod.
@@ -29,16 +31,39 @@ export DATABASE_URL="sqlite:///$(pwd)/database/db.sqlite3"  # For local develope
 
 Start the backend server locally
 ```shell
-uvicorn backend.main:app
+python -m uvicorn backend.main:app
 ```
 
 Start the frontend demo
 ```shell
-streamlit run frontend/app.py
+python -m streamlit run frontend/app.py
 ```
 
-You should then be able to login and chat to the bot:
+You should than be able to login and chat to the bot:
+
 ![](login_and_chat.gif)
+
+Right now the RAG does not have any document loaded, let's add a sample:
+```shell
+python data_sample/add_data_sample_to_rag.py
+```
+
+The RAG now has access to thn information from your loaded documents:
+
+![](query_with_knowledge.gif)
+
+## Documentation
+
+To deep dive into under the hood, take a look at the documentation
+
+[On github pages](https://redesigned-umbrella-evz5np5.pages.github.io/)
+
+Or serve them locally:
+```shell
+mkdocs serve
+```
+Then go to http://localhost:8000/
+
 
 
 ## Architecture
