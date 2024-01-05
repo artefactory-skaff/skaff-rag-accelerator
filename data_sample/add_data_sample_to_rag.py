@@ -2,7 +2,6 @@ from pathlib import Path
 
 from backend.rag_components.rag import RAG
 
-
 config_directory = Path("backend/config.yaml")
 rag = RAG(config_directory)
 
