@@ -1,7 +1,12 @@
 LLMConfig: &LLMConfig
-  source: ChatOllama
+  source: AzureChatOpenAI
   source_config:
-    model: llama2
+    openai_api_type: azure
+    openai_api_key: {{ OPENAI_API_KEY }}
+    openai_api_base: https://genai-ds.openai.azure.com/
+    openai_api_version: 2023-07-01-preview
+    deployment_name: gpt4
+  temperature: 0.1
 
 VectorStoreConfig: &VectorStoreConfig
   source: Chroma
@@ -10,12 +15,12 @@ VectorStoreConfig: &VectorStoreConfig
     collection_metadata:
       hnsw:space: cosine
 
-  retriever_search_type: similarity
+  retriever_search_type: similarity_score_threshold
   retriever_config:
-    top_k: 20
+    k: 20
     score_threshold: 0.5
 
-  insertion_mode: full
+  insertion_mode: null
 
 EmbeddingModelConfig: &EmbeddingModelConfig
   source: OpenAIEmbeddings

@@ -23,6 +23,7 @@ pip install -r requirements.txt
 
 You will need to set some env vars, either in a .env file at the project root, or just by exporting them like so:
 ```shell
+export PYTHONPATH=.
 export OPENAI_API_KEY="xxx"  # API key used to query the LLM
 export EMBEDDING_API_KEY="xxx"  # API key used to query the embedding model
 export DATABASE_URL="sqlite:///$(pwd)/database/db.sqlite3"  # For local developement only. You will need a real, cloud-based SQL database URL for prod.
@@ -30,16 +31,26 @@ export DATABASE_URL="sqlite:///$(pwd)/database/db.sqlite3"  # For local develope
 
 Start the backend server locally
 ```shell
-python backend/main.py
+python -m uvicorn backend.main:app
 ```
 
 Start the frontend demo
 ```shell
-streamlit run frontend/app.py
+python -m streamlit run frontend/app.py
 ```
 
 You should than be able to login and chat to the bot:
+
 ![](docs/login_and_chat.gif)
+
+Right now the RAG does not have any document loaded, let's add a sample:
+```shell
+python data_sample/add_data_sample_to_rag.py
+```
+
+The RAG now has access to thn information from your loaded documents:
+
+![](docs/query_with_knowledge.gif)
 
 ## Documentation
 

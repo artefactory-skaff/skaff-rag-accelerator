@@ -8,12 +8,12 @@ VectorStoreConfig: &VectorStoreConfig
     collection_metadata:
       hnsw:space: cosine
 
-  retreiver_search_type: similarity
-  retreiver_config:
-    top_k: 20
+  retriever_search_type: similarity_score_threshold
+  retriever_config:
+    k: 20
     score_threshold: 0.5
 
-  insertion_mode: full
+  insertion_mode: null
 ```
 
 `persist_directory`: where, locally the Chroma database will be persisted.
@@ -24,4 +24,4 @@ VectorStoreConfig: &VectorStoreConfig
 
 `score_threshold`: score below which a document is deemed irrelevant and not fetched.
 
-`ìnsertion_mode`: `null` | `full` | `incremental`. [How document insertion in the vector store is handled.](https://python.langchain.com/docs/modules/data_connection/indexing#deletion-modes)
+`ìnsertion_mode`: `null` | `full` | `incremental`. [How document indexing and insertion in the vector store is handled.](https://python.langchain.com/docs/modules/data_connection/indexing#deletion-modes)
