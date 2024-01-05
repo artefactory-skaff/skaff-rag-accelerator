@@ -65,10 +65,7 @@ mkdocs serve
 Then go to http://localhost:8000/
 
 
-
 ## Architecture
-
-### The `frontend`, the `backend`, and the `database`
 
 The whole goal of this repo is to decouple the "computing and LLM querying" part from the "rendering a user interface" part. We do this with a typical 3-tier architecture.
 
@@ -80,8 +77,4 @@ The whole goal of this repo is to decouple the "computing and LLM querying" part
 
 The structure of the repo mirrors this architecture.
 
-### The RAG
-
-![](rag_architecture.png)
-
-In the `backend` folder of the repository, you will find a `rag_components` directory that implements this architecture.
+![](architecture.png)
