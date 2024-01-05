@@ -142,3 +142,4 @@ vector_database/
 *.sqlite
 *.sqlite3
 vector_database/
+.streamlit/
