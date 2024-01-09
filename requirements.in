@@ -12,7 +12,7 @@ streamlit
 extra_streamlit_components
 google-cloud-storage
 openai==0.28.1
-langchain==0.0.354
+langchain==0.1.0
 chromadb==0.4.14
 tiktoken
 gcsfs

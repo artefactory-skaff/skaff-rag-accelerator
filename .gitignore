@@ -143,3 +143,4 @@ vector_database/
 *.sqlite3
 vector_database/
 .streamlit/
+.ruff_cache/

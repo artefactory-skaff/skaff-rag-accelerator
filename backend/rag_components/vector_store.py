@@ -1,6 +1,6 @@
 import inspect
 
-from langchain import vectorstores
+from langchain_community import vectorstores
 
 from backend.config import RagConfig
 

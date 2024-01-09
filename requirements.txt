@@ -32,9 +32,9 @@ anyio==4.2.0
     #   langchain-core
     #   starlette
     #   watchfiles
-apify-client==1.6.1
+apify-client==1.6.2
     # via -r requirements.in
-apify-shared==1.1.0
+apify-shared==1.1.1
     # via apify-client
 attrs==23.2.0
     # via
@@ -275,13 +275,13 @@ jsonschema==4.20.0
     #   nbformat
 jsonschema-specifications==2023.12.1
     # via jsonschema
-jupyter-core==5.7.0
+jupyter-core==5.7.1
     # via nbformat
-langchain==0.0.354
+langchain==0.1.0
     # via -r requirements.in
-langchain-community==0.0.8
+langchain-community==0.0.10
     # via langchain
-langchain-core==0.1.6
+langchain-core==0.1.8
     # via
     #   langchain
     #   langchain-community
@@ -289,14 +289,14 @@ langchainhub==0.1.14
     # via -r requirements.in
 langdetect==1.0.9
     # via unstructured
-langsmith==0.0.77
+langsmith==0.0.78
     # via
     #   langchain
     #   langchain-community
     #   langchain-core
 loguru==0.7.2
     # via trubrics
-lxml==5.0.0
+lxml==5.1.0
     # via
     #   python-pptx
     #   unstructured
@@ -544,7 +544,7 @@ pyyaml-env-tag==0.1
     # via mkdocs
 rapidfuzz==3.6.1
     # via unstructured
-referencing==0.32.0
+referencing==0.32.1
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -635,7 +635,7 @@ sqlalchemy==2.0.25
     # via
     #   langchain
     #   langchain-community
-sqlglot==20.7.1
+sqlglot==20.8.0
     # via -r requirements.in
 starlette==0.32.0.post1
     # via fastapi
@@ -704,7 +704,7 @@ typer==0.9.0
     # via
     #   chromadb
     #   trubrics
-types-requests==2.31.0.20231231
+types-requests==2.31.0.20240106
     # via langchainhub
 typing-extensions==4.9.0
     # via
@@ -734,7 +734,7 @@ universal-pathlib==0.1.4
     # via -r requirements.in
 unstructured==0.11.8
     # via -r requirements.in
-unstructured-client==0.15.1
+unstructured-client==0.15.2
     # via unstructured
 urllib3==2.0.7
     # via

@@ -1,7 +1,7 @@
 from typing import List
 
-from langchain import chat_models
 from langchain.callbacks.base import BaseCallbackHandler
+from langchain_community import chat_models
 
 from backend.config import RagConfig
 
