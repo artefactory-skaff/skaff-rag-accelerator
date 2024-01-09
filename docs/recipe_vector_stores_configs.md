@@ -5,7 +5,7 @@ As we need a backend SQL database to store conversation history and other info, 
 [See the recipes for database configs here](recipe_databases_configs.md)
 
 ```shell
-pip install pgvector
+pip install psycopg2-binary pgvector
 ```
 
 ```yaml
