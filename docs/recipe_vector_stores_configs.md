@@ -1,4 +1,35 @@
-## Chroma
+## PostgreSQL
+
+As we need a backend SQL database to store conversation history and other info, using Postgres as a vector store is very attractive for us. Implementeing all this functionalities using the same technology reduces deployment overhead and complexity.
+
+[See the recipes for database configs here](recipe_databases_configs.md)
+
+```shell
+pip install pgvector
+```
+
+```yaml
+VectorStoreConfig: &VectorStoreConfig
+  source: PGVector
+  source_config:
+    connection_string: {{ DATABASE_URL }}
+
+  retriever_search_type: similarity_score_threshold
+  retriever_config:
+    k: 20
+    score_threshold: 0.5
+
+  insertion_mode: null
+```
+
+`top_k`: maximum number of documents to fetch.
+
+`score_threshold`: score below which a document is deemed irrelevant and not fetched.
+
+`insertion_mode`: `null` | `full` | `incremental`. [How document indexing and insertion in the vector store is handled.](https://python.langchain.com/docs/modules/data_connection/indexing#deletion-modes)
+
+
+## Local Chroma
 
 ```yaml
 VectorStoreConfig: &VectorStoreConfig
@@ -24,4 +55,4 @@ VectorStoreConfig: &VectorStoreConfig
 
 `score_threshold`: score below which a document is deemed irrelevant and not fetched.
 
-`ìnsertion_mode`: `null` | `full` | `incremental`. [How document indexing and insertion in the vector store is handled.](https://python.langchain.com/docs/modules/data_connection/indexing#deletion-modes)
+`insertion_mode`: `null` | `full` | `incremental`. [How document indexing and insertion in the vector store is handled.](https://python.langchain.com/docs/modules/data_connection/indexing#deletion-modes)
