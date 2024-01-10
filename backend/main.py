@@ -158,7 +158,9 @@ async def stream_response(rag: RAG, chat_id: str, question, response):
                 await asyncio.sleep(0)
     except Exception as e:
         logger.error(f"Error generating response for chat {chat_id}: {e}", exc_info=True)
-        full_response = f"Sorry, there was an error generating a response. Please contact an administrator and provide them with the following error code: {response_id} \n\n {traceback.format_exc()}"
+        full_response = f"Sorry, there was an error generating a response. \
+            Please contact an administrator and provide them with the following error code: \
+            {response_id} \n\n {traceback.format_exc()}"
         yield full_response.encode("utf-8")
     finally:
         await log_response_to_db(chat_id, full_response)

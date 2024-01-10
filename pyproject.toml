@@ -26,11 +26,7 @@ select = [
   "F",
   "I",
   "N",
-  "D",
-  "ANN",
   "Q",
-  "RET",
-  "ARG",
   "PTH",
   "PD",
 ] # See: https://beta.ruff.rs/docs/rules/

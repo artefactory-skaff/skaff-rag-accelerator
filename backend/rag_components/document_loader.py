@@ -32,7 +32,8 @@ def get_best_loader(file_extension: str, llm: BaseChatModel):
     prompt = PromptTemplate(
         input_variables=["file_extension", "loaders"],
         template="""
-    Among the following loaders, which is the best to load a "{file_extension}" file? Only give me one the class name without any other special characters. If no relevant loader is found, respond "None".
+    Among the following loaders, which is the best to load a "{file_extension}" file? \
+        Only give me one the class name without any other special characters. If no relevant loader is found, respond "None".
 
     Loaders: {loaders}
     """,

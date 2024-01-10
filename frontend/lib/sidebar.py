@@ -3,7 +3,7 @@ from datetime import datetime
 import humanize
 import streamlit as st
 
-from frontend.lib.chat import Message, new_chat
+from frontend.lib.chat import Message
 
 
 def sidebar():

@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 import sqlglot
 from dbutils.pooled_db import PooledDB
-from dotenv import load_dotenv
+from dotenv import load_dotenv  # noqa
 from sqlalchemy.engine.url import make_url
 
 from backend.logger import get_logger
@@ -75,8 +75,8 @@ class Database:
     def initialize_schema(self):
         try:
             self.logger.debug("Initializing database schema")
-            sql_script = Path(__file__).parent.joinpath('db_init.sql').read_text()
-            transpiled_sql = sqlglot.transpile(sql_script, read='sqlite', write=self.url.drivername.replace("postgresql", "postgres"))
+            sql_script = Path(__file__).parent.joinpath("db_init.sql").read_text()
+            transpiled_sql = sqlglot.transpile(sql_script, read="sqlite", write=self.url.drivername.replace("postgresql", "postgres"))
             for statement in transpiled_sql:
                 self.execute(statement)
             self.logger.info(f"Database schema initialized successfully for {self.url.drivername}")
@@ -88,18 +88,36 @@ class Database:
         if self.connection_string.startswith("sqlite:///"):
             import sqlite3
             Path(self.connection_string.replace("sqlite:///", "")).parent.mkdir(parents=True, exist_ok=True)
-            return PooledDB(creator=sqlite3, database=self.connection_string.replace("sqlite:///", ""), maxconnections=5)
+            return PooledDB(
+                creator=sqlite3,
+                database=self.connection_string.replace("sqlite:///", ""),
+                maxconnections=5
+            )
         elif self.connection_string.startswith("postgresql://"):
             import psycopg2
-            return PooledDB(creator=psycopg2, dsn=self.connection_string, maxconnections=5)
-        elif self.connection_string.startswith("mysql://"):
+            return PooledDB(
+                creator=psycopg2,
+                dsn=self.connection_string,
+                maxconnections=5
+            )
+        elif self.connection_string.startswith("mysql://") or \
+             self.connection_string.startswith("mysql+pymysql://"):
             import mysql.connector
-            return PooledDB(creator=mysql.connector, user=self.url.username, password=self.url.password, host=self.url.host, port=self.url.port, database=self.url.database, maxconnections=5)
-        elif self.connection_string.startswith("mysql+pymysql://"):
-            import mysql.connector
-            return PooledDB(creator=mysql.connector, user=self.url.username, password=self.url.password, host=self.url.host, port=self.url.port, database=self.url.database, maxconnections=5)
+            return PooledDB(
+                creator=mysql.connector,
+                user=self.url.username,
+                password=self.url.password,
+                host=self.url.host,
+                port=self.url.port,
+                database=self.url.database,
+                maxconnections=5
+            )
         elif self.connection_string.startswith("sqlserver://"):
             import pyodbc
-            return PooledDB(creator=pyodbc, dsn=self.connection_string.replace("sqlserver://", ""), maxconnections=5)
+            return PooledDB(
+                creator=pyodbc,
+                dsn=self.connection_string.replace("sqlserver://", ""),
+                maxconnections=5
+            )
         else:
             raise ValueError(f"Unsupported database type: {self.url.drivername}")

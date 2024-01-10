@@ -71,7 +71,7 @@ class RagConfig:
     def from_yaml(cls, yaml_path: Path, env: dict = None):
         if env is None:
             env = os.environ
-        with open(yaml_path, "r") as file:
+        with Path.open(yaml_path, "r") as file:
             template = Template(file.read())
             config_data = yaml.safe_load(template.render(env))["RagConfig"]
 

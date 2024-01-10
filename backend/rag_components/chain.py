@@ -14,11 +14,19 @@ from backend.rag_components.logging_callback_handler import LoggingCallbackHandl
 
 DEFAULT_DOCUMENT_PROMPT = PromptTemplate.from_template(template="{page_content}")
 
-def get_answer_chain(config: RagConfig, vector_store: VectorStore, memory: ConversationBufferWindowMemory, logging_callback_handler: LoggingCallbackHandler = None):
+def get_answer_chain(
+        config: RagConfig,
+        vector_store: VectorStore,
+        memory: ConversationBufferWindowMemory,
+        logging_callback_handler: LoggingCallbackHandler = None
+    ):
     llm_callbacks = [logging_callback_handler] if logging_callback_handler is not None else []
     llm = get_llm_model(config, callbacks=llm_callbacks)
 
-    retriever = vector_store.as_retriever(search_type=config.vector_store.retriever_search_type, search_kwargs=config.vector_store.retriever_config)
+    retriever = vector_store.as_retriever(
+        search_type=config.vector_store.retriever_search_type,
+        search_kwargs=config.vector_store.retriever_config
+    )
 
     condense_question_prompt = PromptTemplate.from_template(prompts.condense_history)
     question_answering_prompt = ChatPromptTemplate.from_template(prompts.respond_to_question)

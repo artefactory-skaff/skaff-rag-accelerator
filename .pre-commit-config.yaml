@@ -5,7 +5,6 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-toml
-      - id: check-yaml
       - id: check-json
       - id: check-added-large-files
   - repo: local
@@ -17,7 +16,7 @@ repos:
         language: system
       - id: ruff
         name: Linting (ruff)
-        entry: ruff
+        entry: ruff --fix
         types: [python]
         language: system
       - id: nbstripout

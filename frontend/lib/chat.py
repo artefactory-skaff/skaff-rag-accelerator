@@ -42,7 +42,7 @@ def chat():
             response = send_prompt(user_message)
             with st.chat_message("assistant"):
                 placeholder = st.empty()
-                full_response = ''
+                full_response = ""
                 for item in response:
                     full_response += item
                     placeholder.write(full_response)
