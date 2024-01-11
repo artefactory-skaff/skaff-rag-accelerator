@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: RAG indus kit
+  title: GenAI RAG indus kit
+  description: >
+    Deploy production grade RAGs quickly, anywhere.
+  labels:
+    technical: "1"
+  annotations:
+    github.com/project-slug: artefactory/skaff-rag-accelerator
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - genai
+    - langchain
+    - rag
+    - python
+spec:
+  type: service
+  owner: user:alexisVLRT
+  lifecycle: experimental
