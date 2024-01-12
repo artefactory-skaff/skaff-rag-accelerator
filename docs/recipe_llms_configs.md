@@ -41,6 +41,10 @@ LLMConfig: &LLMConfig
     gcloud auth application-default login
     ```
 
+!!! info ""
+
+    [Activate the Vertex APIs in your project](https://console.cloud.google.com/vertex-ai)
+
 ```yaml
 LLMConfig: &LLMConfig
   source: ChatVertexAI
