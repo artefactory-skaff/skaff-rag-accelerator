@@ -5,7 +5,7 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 
 ## Features
 
-- A configurable RAG setup based around Langchain
+- A configurable RAG setup based around Langchain ([Check out the configuration cookbook here](https://redesigned-umbrella-evz5np5.pages.github.io/cookbook/))
 - `RAG` and `RagConfig` python classes to help you set things up
 - A REST API based on FastAPI to provide easy access to the RAG as a web backend
 - A demo Streamlit to serve as a basic working frontend (not production grade)
@@ -39,7 +39,7 @@ Start the frontend demo
 python -m streamlit run frontend/app.py
 ```
 
-You should than be able to login and chat to the bot:
+You should then be able to login and chat to the bot:
 
 ![](docs/login_and_chat.gif)
 
@@ -54,7 +54,7 @@ The RAG now has access to thn information from your loaded documents:
 
 ## Documentation
 
-To deep dive into under the hood, take a look at the documentation
+To learn how to configure the RAG, take a look at the documentation
 
 [On github pages](https://redesigned-umbrella-evz5np5.pages.github.io/)
 

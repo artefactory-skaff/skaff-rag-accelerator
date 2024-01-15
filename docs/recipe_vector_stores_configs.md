@@ -9,6 +9,7 @@ pip install psycopg2-binary pgvector
 ```
 
 ```yaml
+# backend/config.yaml
 VectorStoreConfig: &VectorStoreConfig
   source: PGVector
   source_config:
@@ -32,6 +33,7 @@ VectorStoreConfig: &VectorStoreConfig
 ## Local Chroma
 
 ```yaml
+# backend/config.yaml
 VectorStoreConfig: &VectorStoreConfig
   source: Chroma
   source_config:

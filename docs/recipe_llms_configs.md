@@ -1,6 +1,7 @@
 ## Artefact Azure-hosted GPT4-turbo
 
 ```yaml
+# backend/config.yaml
 LLMConfig: &LLMConfig
   source: AzureChatOpenAI
   source_config:
@@ -24,6 +25,7 @@ LLMConfig: &LLMConfig
     ```
 
 ```yaml
+# backend/config.yaml
 LLMConfig: &LLMConfig
   source: ChatOllama
   source_config:
@@ -42,10 +44,10 @@ LLMConfig: &LLMConfig
     ```
 
 !!! info ""
-
-    [Activate the Vertex APIs in your project](https://console.cloud.google.com/vertex-ai)
+    <a href="https://console.cloud.google.com/vertex-ai" target="_blank">Activate the Vertex APIs in your project</a>
 
 ```yaml
+# backend/config.yaml
 LLMConfig: &LLMConfig
   source: ChatVertexAI
   source_config:

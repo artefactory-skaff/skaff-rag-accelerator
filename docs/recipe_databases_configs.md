@@ -14,6 +14,7 @@ As the database URL contains a username and password, we don't want to have it d
 
 Instead, we have:
 ```yaml
+# backend/config.yaml
 DatabaseConfig: &DatabaseConfig
   database_url: {{ DATABASE_URL }}
 ```
