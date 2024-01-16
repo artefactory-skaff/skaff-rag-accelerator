@@ -1,7 +1,5 @@
 import inspect
-
 from langchain_community import vectorstores
-
 from backend.config import RagConfig
 
 
@@ -20,5 +18,15 @@ def get_vector_store(embedding_model, config: RagConfig):
 
     kwargs = {key: value for key, value in config.vector_store.source_config.items() if key in parameters.keys()}
     kwargs[embedding_param.name] = embedding_model
+
+    if config.vector_store.source == "MatchingEngine":
+        import os
+        from google.cloud import storage
+        from google.cloud import aiplatform
+        aiplatform.init(project=os.environ.get("PROJECT_ID"), location=os.environ.get("REGION"))
+        kwargs["gcs_client"] = storage.Client(project=os.environ.get("PROJECT_ID"))
+        kwargs["index"] = aiplatform.MatchingEngineIndex(index_name=os.environ.get("INDEX_ID"))
+        kwargs["endpoint"] = aiplatform.MatchingEngineIndexEndpoint(index_endpoint_name=os.environ.get("ENDPOINT_ID"))
+
     vector_store = vector_store_spec(**kwargs)
     return vector_store

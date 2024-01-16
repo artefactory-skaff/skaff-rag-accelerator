@@ -50,4 +50,4 @@ def get_loaders() -> List[str]:
     for _, obj in inspect.getmembers(langchain.document_loaders):
         if inspect.isclass(obj):
             loaders.append(obj.__name__)
-    return loaders
+    return loaders + ["TextLoader"]

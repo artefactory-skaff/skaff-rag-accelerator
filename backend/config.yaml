@@ -1,35 +1,34 @@
 LLMConfig: &LLMConfig
-  source: AzureChatOpenAI
+  source: ChatVertexAI
   source_config:
-    openai_api_type: azure
-    openai_api_key: {{ OPENAI_API_KEY }}
-    openai_api_base: https://genai-ds.openai.azure.com/
-    openai_api_version: 2023-07-01-preview
-    deployment_name: gpt4
+    project_id: genai-vertex
+    model_name: chat-bison@001
+    location: europe-west1
+    max_output_tokens: 512
   temperature: 0.1
 
 VectorStoreConfig: &VectorStoreConfig
-  source: Chroma
+  source: MatchingEngine
   source_config:
+    project_id: genai-vertex
+    gcs_bucket_name: rag_accelerator_matchin_engine
     persist_directory: vector_database/
     collection_metadata:
       hnsw:space: cosine
 
-  retriever_search_type: similarity_score_threshold
+  retriever_search_type: similarity
   retriever_config:
-    k: 20
-    score_threshold: 0.5
+    k: 10
 
   insertion_mode: null
 
 EmbeddingModelConfig: &EmbeddingModelConfig
-  source: OpenAIEmbeddings
+  source: VertexAIEmbeddings
   source_config:
-    openai_api_type: azure
-    openai_api_key: {{ EMBEDDING_API_KEY }}
-    openai_api_base: https://poc-openai-artefact.openai.azure.com/
-    deployment: embeddings
-    chunk_size: 500
+    location: europe-west1
+    project_id: genai-vertex
+    model_name: textembedding-gecko@001
+
 
 DatabaseConfig: &DatabaseConfig
   database_url: {{ DATABASE_URL }}
