@@ -34,10 +34,10 @@ LLMConfig: &LLMConfig
 
 ## Vertex AI gemini-pro
 
-!!! warning 
+!!! warning
 
     Right now Gemini models' safety settings are **very** sensitive, and is is not possible to disable them. That makes this model pretty much useless for the time being as it blocks most requests and/or responses.
-    
+
     Github issue to follow: https://github.com/langchain-ai/langchain/pull/15344#issuecomment-1888597151
 
 !!! info "You will first need to login to GCP"

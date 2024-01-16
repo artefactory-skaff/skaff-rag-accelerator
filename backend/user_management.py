@@ -2,9 +2,9 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional
 
+import argon2
 from jose import jwt
 from pydantic import BaseModel
-import argon2
 
 from backend.database import Database
 
@@ -56,10 +56,10 @@ def authenticate_user(username: str, password: bytes) -> bool | User:
     user = get_user(username)
     if not user:
         return False
-    
+
     if argon2.verify_password(user.hashed_password, password.encode("utf-8")):
         return user
-    
+
     return False
 
 def create_access_token(*, data: dict, expires_delta: Optional[timedelta] = None) -> str:

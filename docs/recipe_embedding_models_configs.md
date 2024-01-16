@@ -3,7 +3,7 @@
 This will download the selected model from the HF hub and make embeddings on the machine the backend is running on.
 ```shell
 pip install sentence_transformers
-``` 
+```
 
 ```yaml
 # backend/config.yaml
