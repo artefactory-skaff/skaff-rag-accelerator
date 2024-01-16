@@ -8,7 +8,7 @@ If the question is already self-sufficient, return the original question. If it 
 Question: {question}
 
 Rephrased question:
-"""
+""" # noqa: E501
 
 respond_to_question = """
 As a chatbot assistant, your mission is to respond to user inquiries in a precise and concise manner based on the documents provided as input. It is essential to respond in the same language in which the question was asked. Responses must be written in a professional style and must demonstrate great attention to detail. You must sift through various sources of information, disregarding any data that is not relevant to the query's context. Your response should integrate knowledge from the valid sources you have identified. Additionally, the question might include hypothetical or counterfactual statements. You need to recognize these and adjust your response to provide accurate, relevant information without being misled by the counterfactuals.
@@ -20,4 +20,4 @@ Respond to the question only taking into account the following documents. If no 
 Documents: {context}
 
 Response:
-"""
+""" # noqa: E501
