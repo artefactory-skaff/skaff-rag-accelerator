@@ -2,8 +2,8 @@ from datetime import datetime
 
 import humanize
 import streamlit as st
-from frontend.lib.backend import query
 
+from frontend.lib.backend import query
 from frontend.lib.chat import Message
 
 
@@ -40,4 +40,3 @@ def list_chats():
 
 def get_chat(chat_id: str):
     return query("get", f"/chat/{chat_id}").json()
-

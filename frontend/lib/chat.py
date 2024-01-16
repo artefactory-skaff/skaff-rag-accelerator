@@ -5,7 +5,6 @@ from uuid import uuid4
 import streamlit as st
 from streamlit_feedback import streamlit_feedback
 
-from frontend.lib.auth import auth
 from frontend.lib.backend import query
 
 
