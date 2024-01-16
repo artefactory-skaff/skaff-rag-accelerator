@@ -21,6 +21,7 @@ from backend.rag_components.rag import RAG
 from backend.user_management import (
     ALGORITHM,
     SECRET_KEY,
+    UnsecureUser,
     User,
     authenticate_user,
     create_access_token,
@@ -35,7 +36,7 @@ logger = get_logger()
 with Database() as connection:
     connection.initialize_schema()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
@@ -211,7 +212,8 @@ async def feedback_thumbs_down(
 
 
 @app.post("/user/signup")
-async def signup(user: User) -> dict:
+async def signup(user: UnsecureUser) -> dict:
+    user = User.from_unsecure_user(user)
     if user_exists(user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=f"User {user.email} already registered"
@@ -248,7 +250,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=60)
-    access_token = create_access_token(data=user.model_dump(), expires_delta=access_token_expires)
+    user_data = user.model_dump()
+    del user_data["hashed_password"]
+    access_token = create_access_token(data=user_data, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
 

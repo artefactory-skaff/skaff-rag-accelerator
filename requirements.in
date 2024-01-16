@@ -42,3 +42,4 @@ mkdocs
 mkdocs-techdocs-core
 pymdown-extensions
 mkdocs_monorepo_plugin
+argon2-cffi

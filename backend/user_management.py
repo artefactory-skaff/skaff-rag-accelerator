@@ -4,6 +4,7 @@ from typing import Optional
 
 from jose import jwt
 from pydantic import BaseModel
+import argon2
 
 from backend.database import Database
 
@@ -11,15 +12,24 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "default_unsecure_key")
 ALGORITHM = "HS256"
 
 
+class UnsecureUser(BaseModel):
+    email: str = None
+    password: bytes = None
+
 class User(BaseModel):
     email: str = None
-    password: str = None
+    hashed_password: bytes = None
+
+    @classmethod
+    def from_unsecure_user(cls, unsecure_user: UnsecureUser):
+        hashed_password = argon2.hash_password(unsecure_user.password)
+        return cls(email=unsecure_user.email, hashed_password=hashed_password)
 
 
 def create_user(user: User) -> None:
     with Database() as connection:
         connection.execute(
-            "INSERT INTO users (email, password) VALUES (?, ?)", (user.email, user.password)
+            "INSERT INTO users (email, password) VALUES (?, ?)", (user.email, user.hashed_password)
         )
 
 
@@ -33,7 +43,7 @@ def get_user(email: str) -> Optional[User]:
     with Database() as connection:
         user_row = connection.fetchone("SELECT * FROM users WHERE email = ?", (email,))
         if user_row:
-            return User(email=user_row[0], password=user_row[1])
+            return User(email=user_row[0], hashed_password=user_row[1])
         return None
 
 
@@ -42,12 +52,15 @@ def delete_user(email: str) -> None:
         connection.execute("DELETE FROM users WHERE email = ?", (email,))
 
 
-def authenticate_user(username: str, password: str) -> Optional[User]:
+def authenticate_user(username: str, password: bytes) -> bool | User:
     user = get_user(username)
-    if not user or not password == user.password:
+    if not user:
         return False
-    return user
-
+    
+    if argon2.verify_password(user.hashed_password, password.encode("utf-8")):
+        return user
+    
+    return False
 
 def create_access_token(*, data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
