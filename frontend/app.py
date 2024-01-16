@@ -22,18 +22,14 @@ if __name__ == "__main__":
     )
 
     if st.session_state.get("session", None) is None:
-        session = auth()
+        auth()
         st.stop()
+    else:
+        logo_chat = Image.open(assets / "logo_chat.png")
+        logo_user = Image.open(assets / "logo_user.png")
 
-    logo_chat = Image.open(assets / "logo_chat.png")
-    logo_user = Image.open(assets / "logo_user.png")
+        st.image(Image.open(assets / "logo_title.jpeg"))
+        st.caption("Learn more about the RAG indus kit here: https://artefactory.github.io/skaff-rag-accelerator")
 
-    st.image(Image.open(assets / "logo_title.jpeg"))
-    st.caption(
-        "Démo d'un assistant IA, cloud agnostic, permettant de faire du RAG \
-        sur différent types de document.\
-        Le backend du ChatBot est APéïsé ce qui permet une meilleure scalabilité et robustesse."
-    )
-
-    sidebar()
-    chat()
+        sidebar()
+        chat()

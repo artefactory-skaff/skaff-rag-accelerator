@@ -249,10 +249,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=60)
     user_data = user.model_dump()
     del user_data["hashed_password"]
-    access_token = create_access_token(data=user_data, expires_delta=access_token_expires)
+    access_token = create_access_token(data=user_data)
     return {"access_token": access_token, "token_type": "bearer"}
 
 

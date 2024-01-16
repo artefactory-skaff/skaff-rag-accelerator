@@ -5,6 +5,9 @@ from uuid import uuid4
 import streamlit as st
 from streamlit_feedback import streamlit_feedback
 
+from frontend.lib.auth import auth
+from frontend.lib.backend import query
+
 
 @dataclass
 class Message:
@@ -63,23 +66,18 @@ def chat():
 
 
 def new_chat():
-    session = st.session_state.get("session")
-    response = session.post("/chat/new")
-    st.session_state["chat_id"] = response.json()["chat_id"]
+    chat_id = query("post", "/chat/new").json()["chat_id"]
+    st.session_state["chat_id"] = chat_id
     st.session_state["messages"] = []
-    return response.json()["chat_id"]
+    return chat_id
 
 
 def send_prompt(message: Message):
-    session = st.session_state.get("session")
-    response = session.post(f"/chat/{message.chat_id}/user_message", stream=True, json=asdict(message))
-
+    response = query("post", f"/chat/{message.chat_id}/user_message", stream=True, json=asdict(message))
     for line in response.iter_content(chunk_size=16, decode_unicode=True):
         yield line
 
 
 def send_feedback(message_id: str, feedback: str):
     feedback = "thumbs_up" if feedback["score"] == "👍" else "thumbs_down"
-    session = st.session_state.get("session")
-    response = session.post(f"/feedback/{message_id}/{feedback}")
-    return response.text
+    return query("post", f"/feedback/{message_id}/{feedback}").text

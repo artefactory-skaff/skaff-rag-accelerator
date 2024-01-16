@@ -19,15 +19,15 @@ def auth() -> Optional[str]:
         default="Login",
     )
     if tab == "Login":
-        return login_form()
+        login_form()
     elif tab == "Signup":
-        return signup_form()
+        signup_form()
     else:
         st.error("Invalid auth mode")
         return None
 
 
-def login_form() -> tuple[bool, Optional[str]]:
+def login_form():
     with st.form("Login"):
         username = st.text_input("Username", key="username")
         password = st.text_input("Password", type="password")
@@ -43,10 +43,10 @@ def login_form() -> tuple[bool, Optional[str]]:
                 st.error("Failed authentication")
             st.session_state["session"] = session
             st.session_state["email"] = username
-            return session
+            st.rerun()
 
 
-def signup_form() -> tuple[bool, Optional[str]]:
+def signup_form():
     with st.form("Signup"):
         username = st.text_input("Username", key="username")
         password = st.text_input("Password", type="password")
@@ -63,7 +63,7 @@ def signup_form() -> tuple[bool, Optional[str]]:
                 st.error("Failed signing up")
             st.session_state["session"] = auth_session
             st.session_state["email"] = username
-            return auth_session
+            st.rerun()
 
 
 def get_token(username: str, password: str) -> Optional[str]:

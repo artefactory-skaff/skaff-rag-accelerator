@@ -2,6 +2,7 @@ from datetime import datetime
 
 import humanize
 import streamlit as st
+from frontend.lib.backend import query
 
 from frontend.lib.chat import Message
 
@@ -35,11 +36,8 @@ def sidebar():
 
 
 def list_chats():
-    session = st.session_state.get("session")
-    response = session.get("/chat/list")
-    return response.json()
+    return query("get", "/chat/list").json()
 
 def get_chat(chat_id: str):
-    session = st.session_state.get("session")
-    response = session.get(f"/chat/{chat_id}")
-    return response.json()
+    return query("get", f"/chat/{chat_id}").json()
+
