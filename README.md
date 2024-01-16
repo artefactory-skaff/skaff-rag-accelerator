@@ -10,7 +10,7 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 - A REST API based on FastAPI to provide easy access to the RAG as a web backend
 - A demo Streamlit to serve as a basic working frontend (not production grade)
 - A document loader for the RAG
-- User authentication (unsecure for now, but usable for conversation history)
+- Secure user authentication
 - User feedback collection
 - Streamed responses
 
