@@ -5,7 +5,7 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 
 ## Features
 
-- A configurable RAG setup based around Langchain ([Check out the configuration cookbook here](https://redesigned-umbrella-evz5np5.pages.github.io/cookbook/))
+- A configurable RAG setup based around Langchain ([Check out the configuration cookbook here](https://artefactory.github.io/skaff-rag-accelerator/cookbook/))
 - `RAG` and `RagConfig` python classes to help you set things up
 - A REST API based on FastAPI to provide easy access to the RAG as a web backend
 - A demo Streamlit to serve as a basic working frontend (not production grade)
@@ -56,7 +56,7 @@ The RAG now has access to thn information from your loaded documents:
 
 To learn how to configure the RAG, take a look at the documentation
 
-[On github pages](https://redesigned-umbrella-evz5np5.pages.github.io/)
+[On github pages](https://artefactory.github.io/skaff-rag-accelerator/)
 
 Or serve them locally:
 ```shell

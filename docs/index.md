@@ -56,7 +56,7 @@ The RAG now has access to thn information from your loaded documents:
 
 To deep dive into under the hood, take a look at the documentation
 
-[On github pages](https://redesigned-umbrella-evz5np5.pages.github.io/)
+[On github pages](https://artefactory.github.io/skaff-rag-accelerator/)
 
 Or serve them locally:
 ```shell
