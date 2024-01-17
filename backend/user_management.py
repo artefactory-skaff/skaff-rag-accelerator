@@ -18,11 +18,11 @@ class UnsecureUser(BaseModel):
 
 class User(BaseModel):
     email: str = None
-    hashed_password: bytes = None
+    hashed_password: str = None
 
     @classmethod
     def from_unsecure_user(cls, unsecure_user: UnsecureUser):
-        hashed_password = argon2.hash_password(unsecure_user.password)
+        hashed_password = argon2.hash_password(unsecure_user.password).decode("utf-8")
         return cls(email=unsecure_user.email, hashed_password=hashed_password)
 
 
@@ -57,7 +57,7 @@ def authenticate_user(username: str, password: bytes) -> bool | User:
     if not user:
         return False
 
-    if argon2.verify_password(user.hashed_password, password.encode("utf-8")):
+    if argon2.verify_password(user.hashed_password.encode("utf-8"), password.encode("utf-8")):
         return user
 
     return False
