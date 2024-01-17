@@ -1,4 +1,5 @@
 import os
+from time import sleep
 from typing import Optional
 from urllib.parse import urljoin
 
@@ -8,7 +9,6 @@ import streamlit as st
 from requests.sessions import Session
 
 FASTAPI_URL = os.getenv("FASTAPI_URL", "http://localhost:8000/")
-
 
 def auth() -> Optional[str]:
     tab = stx.tab_bar(
@@ -31,6 +31,8 @@ def login_form():
     with st.form("Login"):
         username = st.text_input("Username", key="username")
         password = st.text_input("Password", type="password")
+        if st.session_state["login_status_message"]:
+            getattr(st, st.session_state["login_status_level"])(st.session_state["login_status_message"])
         submit = st.form_submit_button("Log in")
 
         if submit:
@@ -40,7 +42,8 @@ def login_form():
                 session = create_session()
                 session = authenticate_session(session, token)
             else:
-                st.error("Failed authentication")
+                st.session_state["login_status_level"] = "error"
+                st.session_state["login_status_message"] = "Username/password combination not found"
             st.session_state["session"] = session
             st.session_state["email"] = username
             st.rerun()
@@ -50,6 +53,8 @@ def signup_form():
     with st.form("Signup"):
         username = st.text_input("Username", key="username")
         password = st.text_input("Password", type="password")
+        if st.session_state["login_status_message"]:
+            getattr(st, st.session_state["login_status_level"])(st.session_state["login_status_message"])
         submit = st.form_submit_button("Sign up")
 
         if submit:
@@ -59,8 +64,14 @@ def signup_form():
                 token = get_token(username, password)
                 session = create_session()
                 auth_session = authenticate_session(session, token)
+                st.session_state["login_status_level"] = "success"
+                st.session_state["login_status_message"] = "Success! Account created."
+                if st.session_state["login_status_message"]:
+                    getattr(st, st.session_state["login_status_level"])(st.session_state["login_status_message"])
+                sleep(1.5)
             else:
-                st.error("Failed signing up")
+                st.session_state["login_status_level"] = "error"
+                st.session_state["login_status_message"] = "Failed signing up"
             st.session_state["session"] = auth_session
             st.session_state["email"] = username
             st.rerun()

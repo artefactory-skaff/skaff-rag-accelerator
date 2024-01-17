@@ -14,6 +14,9 @@ FASTAPI_URL = os.getenv("FASTAPI_URL", "localhost:8000")
 
 assets = Path(__file__).parent / "assets"
 
+st.session_state["login_status_message"] = "" if "login_status_message" not in st.session_state else st.session_state["login_status_message"]
+st.session_state["login_status_level"] = "info" if "login_status_level" not in st.session_state else st.session_state["login_status_level"]
+
 
 if __name__ == "__main__":
     st.set_page_config(
