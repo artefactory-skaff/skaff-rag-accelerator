@@ -1,10 +1,12 @@
 import asyncio
 import inspect
+import os
 import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import List
 from uuid import uuid4
+from dotenv import load_dotenv
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -29,6 +31,9 @@ from backend.user_management import (
     get_user,
     user_exists,
 )
+
+load_dotenv()
+ADMIN_MODE = bool(int(os.getenv("ADMIN_MODE", False)))
 
 app = FastAPI()
 logger = get_logger()
@@ -211,8 +216,11 @@ async def feedback_thumbs_down(
 ############################################
 
 
-@app.post("/user/signup")
+@app.post("/user/signup", include_in_schema=ADMIN_MODE)
 async def signup(user: UnsecureUser) -> dict:
+    if not ADMIN_MODE:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Signup is disabled")
+    
     user = User.from_unsecure_user(user)
     if user_exists(user.email):
         raise HTTPException(

@@ -2,22 +2,23 @@ import os
 from time import sleep
 from typing import Optional
 from urllib.parse import urljoin
+from dotenv import load_dotenv
 
 import extra_streamlit_components as stx
 import requests
 import streamlit as st
 from requests.sessions import Session
 
+load_dotenv()
 FASTAPI_URL = os.getenv("FASTAPI_URL", "http://localhost:8000/")
+ADMIN_MODE = bool(int(os.getenv("ADMIN_MODE", False)))
 
 def auth() -> Optional[str]:
-    tab = stx.tab_bar(
-        data=[
-            stx.TabBarItemData(id="Login", title="Login", description=""),
-            stx.TabBarItemData(id="Signup", title="Signup", description=""),
-        ],
-        default="Login",
-    )
+    data = [stx.TabBarItemData(id="Login", title="Login", description="")]
+    if ADMIN_MODE:
+        data += [stx.TabBarItemData(id="Signup", title="Signup", description="")]
+
+    tab = stx.tab_bar(data=data, default="Login")
     if tab == "Login":
         login_form()
     elif tab == "Signup":

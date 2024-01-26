@@ -24,6 +24,7 @@ pip install -r requirements.txt
 You will need to set some env vars, either in a .env file at the project root, or just by exporting them like so:
 ```shell
 export PYTHONPATH=.
+export ADMIN_MODE=1
 export OPENAI_API_KEY="xxx"  # API key used to query the LLM
 export EMBEDDING_API_KEY="xxx"  # API key used to query the embedding model
 export DATABASE_URL="sqlite:///$(pwd)/database/db.sqlite3"  # For local developement only. You will need a real, cloud-based SQL database URL for prod.
