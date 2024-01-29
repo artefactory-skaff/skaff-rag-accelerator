@@ -39,4 +39,5 @@ def list_chats():
     return query("get", "/chat/list").json()
 
 def get_chat(chat_id: str):
-    return query("get", f"/chat/{chat_id}").json()
+    chat = query("get", f"/chat/{chat_id}").json()
+    return chat

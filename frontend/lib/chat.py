@@ -57,10 +57,13 @@ def chat():
             len(st.session_state.get("messages", [])) > 0
             and len(st.session_state.get("messages")) % 2 == 0
         ):
+            chat_id = st.session_state.get("chat_id")
+            get_chat(st.session_state.get("messages")[-1].chat_id)
+            messages = [Message(**message) for message in get_chat(chat_id)["messages"]]
             streamlit_feedback(
-                key=str(len(st.session_state.get("messages"))),
+                key=str(len(messages)),
                 feedback_type="thumbs",
-                on_submit=lambda feedback: send_feedback(st.session_state.get("messages")[-1].id, feedback),
+                on_submit=lambda feedback: send_feedback(messages[-1].id, feedback),
             )
 
 
@@ -80,3 +83,7 @@ def send_prompt(message: Message):
 def send_feedback(message_id: str, feedback: str):
     feedback = "thumbs_up" if feedback["score"] == "👍" else "thumbs_down"
     return query("post", f"/feedback/{message_id}/{feedback}").text
+
+def get_chat(chat_id: str):
+    chat = query("get", f"/chat/{chat_id}").json()
+    return chat
