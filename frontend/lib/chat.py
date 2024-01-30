@@ -18,8 +18,7 @@ class Message:
 
     def __post_init__(self):
         self.id = str(uuid4()) if self.id is None else self.id
-        self.timestamp = datetime.now().isoformat() if self.timestamp is None else self.timestamp
-
+        self.timestamp = datetime.utcnow().isoformat() if self.timestamp is None else self.timestamp
 
 def chat():
     prompt = st.chat_input("Say something")

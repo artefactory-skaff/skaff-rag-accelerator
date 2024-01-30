@@ -71,7 +71,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 @app.post("/chat/new")
 async def chat_new(current_user: User = Depends(get_current_user)) -> dict:
     chat_id = str(uuid4())
-    timestamp = datetime.now().isoformat()
+    timestamp = datetime.utcnow().isoformat()
     user_id = current_user.email
     with Database() as connection:
         connection.execute(
@@ -177,7 +177,7 @@ async def log_response_to_db(chat_id: str, full_response: str):
     with Database() as connection:
         connection.execute(
             "INSERT INTO message (id, timestamp, chat_id, sender, content) VALUES (?, ?, ?, ?, ?)",
-            (response_id, datetime.now().isoformat(), chat_id, "assistant", full_response),
+            (response_id, datetime.utcnow().isoformat(), chat_id, "assistant", full_response),
         )
 
 async def memorize_response(rag_config: RagConfig, chat_id: str, question: str, answer: str):

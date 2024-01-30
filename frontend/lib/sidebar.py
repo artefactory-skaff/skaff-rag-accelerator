@@ -20,7 +20,7 @@ def sidebar():
             chats_by_time_ago = {}
             for chat in chat_list:
                 chat_id, timestamp = chat["id"], chat["timestamp"]
-                time_ago = humanize.naturaltime(datetime.now() - datetime.fromisoformat(timestamp))
+                time_ago = humanize.naturaltime(datetime.utcnow() - datetime.fromisoformat(timestamp))
                 if time_ago not in chats_by_time_ago:
                     chats_by_time_ago[time_ago] = []
                 chats_by_time_ago[time_ago].append(chat)
