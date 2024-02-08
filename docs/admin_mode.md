@@ -2,7 +2,7 @@ Once you start deploying to a cloud, you may end up having to plublicly expose y
 
 Just deploy with the `ADMIN_MODE` env var as disabled. This could be in your Dockerfile, or any other deployment config.
 ```shell
-ADMIN_MODE=0 
+ADMIN_MODE=0
 ```
 
 This will disable the signup endpoint, preventing people stumbling upon the API from creating an account and using your LLM tokens.

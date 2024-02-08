@@ -1,4 +1,3 @@
-from logging import Logger
 from pathlib import Path
 from typing import List, Union
 
@@ -10,42 +9,31 @@ from langchain.vectorstores import VectorStore
 from langchain.vectorstores.utils import filter_complex_metadata
 
 from backend.config import RagConfig
-from backend.model import Message
-from backend.rag_components.chain import get_answer_chain
-from backend.rag_components.chat_message_history import get_conversation_buffer_memory
+from backend.rag_components.chain import get_base_chain, get_memory_chain
 from backend.rag_components.document_loader import get_documents
 from backend.rag_components.embedding import get_embedding_model
 from backend.rag_components.llm import get_llm_model
-from backend.rag_components.logging_callback_handler import LoggingCallbackHandler
 from backend.rag_components.vector_store import get_vector_store
 
 
 class RAG:
-    def __init__(self, config: Union[Path, RagConfig], logger: Logger = None, context: dict = {}):
+    def __init__(self, config: Union[Path, RagConfig]):
         if isinstance(config, RagConfig):
             self.config = config
         else:
             self.config = RagConfig.from_yaml(config)
 
-        self.logger = logger or Logger("RAG")
-        self.context = context
-
         self.llm: BaseChatModel = get_llm_model(self.config)
         self.embeddings: Embeddings = get_embedding_model(self.config)
         self.vector_store: VectorStore = get_vector_store(self.embeddings, self.config)
 
-    def generate_response(self, message: Message) -> str:
-        memory = get_conversation_buffer_memory(self.config, message.chat_id)
-        logging_callback_handler = LoggingCallbackHandler(self.logger, context=self.context)
-        answer_chain = get_answer_chain(self.config, self.vector_store, memory, logging_callback_handler=logging_callback_handler)
-
-        if self.config.response_mode == "async":
-            response = answer_chain.astream({"question": message.content})
-        elif self.config.response_mode == "stream":
-            response = answer_chain.stream({"question": message.content})
+    def get_chain(self, memory: bool = False):
+        if memory:
+            chain = get_memory_chain(self.config, self.vector_store)
         else:
-            response = answer_chain.invoke({"question": message.content})
-        return response
+            chain = get_base_chain(self.config, self.vector_store)
+        return chain
+
 
     def load_file(self, file_path: Path) -> List[Document]:
         documents = get_documents(file_path, self.llm)

@@ -2,11 +2,11 @@ import os
 from time import sleep
 from typing import Optional
 from urllib.parse import urljoin
-from dotenv import load_dotenv
 
 import extra_streamlit_components as stx
 import requests
 import streamlit as st
+from dotenv import load_dotenv
 from requests.sessions import Session
 
 load_dotenv()

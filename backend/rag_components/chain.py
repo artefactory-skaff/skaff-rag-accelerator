@@ -1,50 +1,53 @@
-from operator import itemgetter
-
-from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import ChatPromptTemplate, PromptTemplate
 from langchain.schema import format_document
 from langchain.vectorstores.base import VectorStore
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables.history import RunnableWithMessageHistory
 
 from backend.config import RagConfig
 from backend.rag_components import prompts
+from backend.rag_components.chat_message_history import get_chat_message_history
 from backend.rag_components.llm import get_llm_model
-from backend.rag_components.logging_callback_handler import LoggingCallbackHandler
 
 DEFAULT_DOCUMENT_PROMPT = PromptTemplate.from_template(template="{page_content}")
 
-def get_answer_chain(
-        config: RagConfig,
-        vector_store: VectorStore,
-        memory: ConversationBufferWindowMemory,
-        logging_callback_handler: LoggingCallbackHandler = None
-    ):
-    llm_callbacks = [logging_callback_handler] if logging_callback_handler is not None else []
-    llm = get_llm_model(config, callbacks=llm_callbacks)
+def get_memory_chain(
+    config: RagConfig,
+    vector_store: VectorStore
+):
+    llm = get_llm_model(config)
+    condense_question_prompt = PromptTemplate.from_template(prompts.condense_history)  # chat_history, question
+    standalone_question = condense_question_prompt | llm | StrOutputParser()
+    base_chain = get_base_chain(config, vector_store)
+    chain =  standalone_question | base_chain
 
+    chain_with_mem = RunnableWithMessageHistory(
+        chain,
+        lambda session_id: get_chat_message_history(config, session_id),
+        input_messages_key="question",
+        history_messages_key="chat_history"
+    )
+
+    return chain_with_mem
+
+
+def get_base_chain(config: RagConfig, vector_store: VectorStore):
+    llm = get_llm_model(config)
     retriever = vector_store.as_retriever(
         search_type=config.vector_store.retriever_search_type,
         search_kwargs=config.vector_store.retriever_config
     )
 
-    condense_question_prompt = PromptTemplate.from_template(prompts.condense_history)
-    question_answering_prompt = ChatPromptTemplate.from_template(prompts.respond_to_question)
+    question_answering_prompt = ChatPromptTemplate.from_template(prompts.respond_to_question)  # standalone_question, relevant_documents
+    relevant_documents = retriever | _combine_documents
 
-
-    _inputs = RunnableParallel(
-        standalone_question=RunnablePassthrough.assign(chat_history=lambda _: memory.buffer_as_str)
-        | condense_question_prompt
+    chain = (
+        {"relevant_documents": relevant_documents, "standalone_question": RunnablePassthrough()}
+        | question_answering_prompt
         | llm
-        | StrOutputParser(),
     )
-    _context = {
-        "context": itemgetter("standalone_question") | retriever | _combine_documents,
-        "question": lambda x: x["standalone_question"],
-    }
-    conversational_qa_chain = _inputs | _context | question_answering_prompt | llm
-    return conversational_qa_chain
-
+    return chain
 
 def _combine_documents(docs, document_prompt=DEFAULT_DOCUMENT_PROMPT, document_separator="\n\n"):
     doc_strings = [format_document(doc, document_prompt) for doc in docs]

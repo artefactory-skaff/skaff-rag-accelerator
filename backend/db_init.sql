@@ -9,20 +9,11 @@ CREATE TABLE IF NOT EXISTS "users" (
     "password" TEXT
 );
 
-CREATE TABLE IF NOT EXISTS "chat" (
+CREATE TABLE IF NOT EXISTS "session" (
     "id" VARCHAR(255) PRIMARY KEY,
     "timestamp" DATETIME,
     "user_id" VARCHAR(255),
     FOREIGN KEY ("user_id") REFERENCES "users" ("email")
-);
-
-CREATE TABLE IF NOT EXISTS "message" (
-    "id" VARCHAR(255) PRIMARY KEY,
-    "timestamp" DATETIME,
-    "chat_id" VARCHAR(255),
-    "sender" TEXT,
-    "content" TEXT,
-    FOREIGN KEY ("chat_id") REFERENCES "chat" ("id")
 );
 
 CREATE TABLE IF NOT EXISTS "feedback" (

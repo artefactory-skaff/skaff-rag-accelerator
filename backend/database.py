@@ -5,11 +5,12 @@ from typing import Any, Optional
 
 import sqlglot
 from dbutils.pooled_db import PooledDB
-from dotenv import load_dotenv  # noqa
+from dotenv import load_dotenv
 from sqlalchemy.engine.url import make_url
 
 from backend.logger import get_logger
 
+load_dotenv()
 POOL = None
 class Database:
     DIALECT_PLACEHOLDERS = {

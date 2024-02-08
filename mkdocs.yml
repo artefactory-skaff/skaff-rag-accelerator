@@ -15,7 +15,7 @@ nav:
   - Loading Docs in the RAG: loading_documents.md
   - The RAG object: rag_object.md
   - The RAGConfig object: rag_config.md
-  - Deployment: 
+  - Deployment:
     - Admin Mode: admin_mode.md
   - Config cookbook:
     - LLMs: recipe_llms_configs.md
