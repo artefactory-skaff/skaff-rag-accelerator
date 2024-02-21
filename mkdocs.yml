@@ -20,3 +20,11 @@ nav:
   - The database: database.md
   - Deployment:
     - Admin Mode: deployment/admin_mode.md
+  - The backend:
+    - The backend: backend/backend.md
+    - RAG and RAGConfig classes: backend/rag_ragconfig.md
+    - Plugins:
+      - Plugins: backend/plugins/plugins.md
+      - Memory and sessions: backend/plugins/conversational_rag_plugin
+      - Authentication: backend/plugins/authentication.md
+      - Secure user-based sessions: backend/plugins/user_based_sessions.md
