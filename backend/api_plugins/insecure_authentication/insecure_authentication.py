@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from fastapi import Depends, HTTPException, Response, status
 
 from backend.api_plugins.lib.user_management import (
@@ -56,7 +57,7 @@ def insecure_authentication_routes(app):
     @app.get("/user/me")
     async def user_me(current_user: User = Depends(get_current_user)) -> User:
         return current_user
-    
+
 
     @app.get("/user")
     async def user_root() -> dict:

@@ -49,7 +49,7 @@ def session_chat():
                 for chunk in response:
                     full_response += chunk.content
                     placeholder.write(full_response)
-                
+
             bot_message = Message("assistant", full_response, session_id)
             st.session_state["messages"].append(bot_message)
 

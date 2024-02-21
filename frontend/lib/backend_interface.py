@@ -1,4 +1,5 @@
 from urllib.parse import urljoin
+
 import streamlit as st
 from requests.sessions import Session
 

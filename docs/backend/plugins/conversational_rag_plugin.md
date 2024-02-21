@@ -25,5 +25,5 @@ We have added two things here:
 We will now have new session management routes available in the API:
 ![sessions_api.png](sessions_api.png)
 
-And also, the playground now takes a `SESSION ID` configuration: 
+And also, the playground now takes a `SESSION ID` configuration:
 ![sessions_playground.png](sessions_playground.png)

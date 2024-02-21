@@ -14,7 +14,7 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 
 ## Quickstart
 
-This quickstart will guide you through the steps to serve a RAG fully locally. You will run the API backend and frontend on your machine, which should allow you to run your first queries against the RAG. 
+This quickstart will guide you through the steps to serve a RAG fully locally. You will run the API backend and frontend on your machine, which should allow you to run your first queries against the RAG.
 
 For this exemple, we will be using the `tinyllama` LLM, the `BAAI/bge-base-en-v1.5` embedding model, and Chroma for the vector store. This allows this setup to be fully local, and independent of any external API (and thus, free). However, the relevance of answers will not be impressive.
 
