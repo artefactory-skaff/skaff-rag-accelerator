@@ -1,8 +1,10 @@
 from datetime import datetime
+import json
+from pathlib import Path
 from typing import List, Optional, Sequence
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, Response
 
 from backend.api_plugins.lib.user_management import User
 
@@ -16,6 +18,9 @@ def session_routes(
     from backend.database import Database
     from backend.model import Message
 
+    with Database() as connection:
+        connection.run_script(Path(__file__).parent / "sessions_tables.sql")
+
     @app.post("/session/new")
     async def chat_new(current_user: User=authentication, dependencies=dependencies) -> dict:
         chat_id = str(uuid4())
@@ -26,7 +31,7 @@ def session_routes(
                 "INSERT INTO session (id, timestamp, user_id) VALUES (?, ?, ?)",
                 (chat_id, timestamp, user_id),
             )
-        return {"chat_id": chat_id}
+        return {"session_id": chat_id}
 
 
     @app.get("/session/list")
@@ -43,20 +48,26 @@ def session_routes(
 
 
     @app.get("/session/{session_id}")
-    async def chat(session_id: str, dependencies=dependencies) -> dict:
+    async def chat(session_id: str, current_user: User=authentication, dependencies=dependencies) -> dict:
         messages: List[Message] = []
         with Database() as connection:
             result = connection.execute(
-                "SELECT id, timestamp, session_id, sender, content FROM message_history WHERE session_id = ? ORDER BY timestamp ASC",
+                "SELECT id, timestamp, session_id, message FROM message_history WHERE session_id = ? ORDER BY timestamp ASC",
                 (session_id,),
             )
             for row in result:
+                content = json.loads(row[3])["data"]["content"]
+                message_type = json.loads(row[3])["type"]
                 message = Message(
                     id=row[0],
                     timestamp=row[1],
-                    chat_id=row[2],
-                    sender=row[3],
-                    content=row[4]
+                    session_id=row[2],
+                    sender=message_type if message_type == "human" else "ai",
+                    content=content,
                 )
                 messages.append(message)
-        return {"chat_id": session_id, "messages": [message.model_dump() for message in messages]}
+        return {"chat_id": session_id, "messages": [message.dict() for message in messages]}
+    
+    @app.get("/session")
+    async def session_root(current_user: User=authentication, dependencies=dependencies) -> dict:
+        return Response("Sessions management routes are enabled.", status_code=200)

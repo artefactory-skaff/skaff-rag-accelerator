@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -6,10 +5,8 @@ import argon2
 from jose import jwt
 from pydantic import BaseModel
 
+from backend import ALGORITHM, SECRET_KEY
 from backend.database import Database
-
-SECRET_KEY = os.environ.get("SECRET_KEY", "default_unsecure_key")
-ALGORITHM = "HS256"
 
 
 class UnsecureUser(BaseModel):
