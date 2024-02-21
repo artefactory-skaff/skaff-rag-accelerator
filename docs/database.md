@@ -16,7 +16,7 @@ This section focuses on architecture descision making. you will find implementat
     - This is the very beginning of the project
 
 
-SQLite is the default option. It is a minimalist SQL database stored as a single `.sqlite` file. This is suitable for local development and prototyping, but not for industrialization. 
+SQLite is the default option. It is a minimalist SQL database stored as a single `.sqlite` file. This is suitable for local development and prototyping, but not for industrialization.
 
 As the data is only persisted locally, this also means you can not easily share it with the rest of the dev team in your project. If that is something you need, consider using cloud-based Postgres or MySQL backends.
 

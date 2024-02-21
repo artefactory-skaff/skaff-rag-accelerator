@@ -1,4 +1,4 @@
-The backend provides a REST API to abstract RAG functionalities. The core embarks just enough to query your indexed documents. 
+The backend provides a REST API to abstract RAG functionalities. The core embarks just enough to query your indexed documents.
 
 More advanced features (authentication, user sessions, ...) can be enabled through [plugins](plugins/plugins.md).
 

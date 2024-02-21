@@ -1,10 +1,11 @@
 from pathlib import Path
 from typing import List
+
 from fastapi import Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
-from backend import ADMIN_MODE
 
+from backend import ADMIN_MODE
 from backend.api_plugins.lib.user_management import (
     ALGORITHM,
     SECRET_KEY,
@@ -23,7 +24,7 @@ def authentication_routes(app, dependencies=List[Depends]):
     from backend.database import Database
     with Database() as connection:
         connection.run_script(Path(__file__).parent / "users_tables.sql")
-        
+
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/user/login")
 
     async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
@@ -96,8 +97,8 @@ def authentication_routes(app, dependencies=List[Depends]):
     @app.get("/user/me")
     async def user_me(current_user: User = Depends(get_current_user)) -> User:
         return current_user
-    
-    
+
+
     @app.get("/user")
     async def user_root() -> dict:
         return Response("User management routes are enabled.", status_code=200)

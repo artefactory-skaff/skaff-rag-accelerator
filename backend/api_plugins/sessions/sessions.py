@@ -1,5 +1,5 @@
-from datetime import datetime
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Sequence
 from uuid import uuid4
@@ -67,7 +67,7 @@ def session_routes(
                 )
                 messages.append(message)
         return {"chat_id": session_id, "messages": [message.dict() for message in messages]}
-    
+
     @app.get("/session")
     async def session_root(current_user: User=authentication, dependencies=dependencies) -> dict:
         return Response("Sessions management routes are enabled.", status_code=200)

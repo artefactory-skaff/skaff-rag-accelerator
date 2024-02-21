@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 def basic_chat():
     user_question = st.chat_input("Say something")
 
