@@ -18,3 +18,5 @@ nav:
   - Home: index.md
   - The frontend: frontend.md
   - The database: database.md
+  - Deployment:
+    - Admin Mode: deployment/admin_mode.md
