@@ -1,5 +1,3 @@
-# This is only used for documentation generation in Roadie. It is not part of the vertex starter kit.
-
 site_name: GenAI RAG Accelerator
 repo_name: artefactory/skaff-rag-accelerator
 repo_url: https://github.com/artefactory/skaff-rag-accelerator
@@ -8,10 +6,16 @@ plugins:
   - techdocs-core
 
 markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist
   - pymdownx.snippets
 
 nav:
-  - Getting started: getting_started.md
+  - Home: index.md
   - The frontend: frontend.md
   - The backend:
     - The backend: backend/backend.md
