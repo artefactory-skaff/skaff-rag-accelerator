@@ -18,8 +18,6 @@ nav:
   - Home: index.md
   - The frontend: frontend.md
   - The database: database.md
-  - Deployment:
-    - Admin Mode: deployment/admin_mode.md
   - The backend:
     - The backend: backend/backend.md
     - RAG and RAGConfig classes: backend/rag_ragconfig.md
@@ -28,3 +26,13 @@ nav:
       - Memory and sessions: backend/plugins/conversational_rag_plugin
       - Authentication: backend/plugins/authentication.md
       - Secure user-based sessions: backend/plugins/user_based_sessions.md
+  - Deployment:
+    - Admin Mode: deployment/admin_mode.md
+  - Cookbook:
+    - config.yaml recipes:
+      - LLMs: cookbook/configs/llms_configs.md
+      - Vector Stores: cookbook/configs/vector_stores_configs.md
+      - Embedding Models: cookbook/configs/embedding_models_configs.md
+      - Databases: cookbook/configs/databases_configs.md
+    - How to load documents in the RAG: cookbook/loading_documents.md
+    - How to extend the RAGConfig: cookbook/extend_ragconfig.md
