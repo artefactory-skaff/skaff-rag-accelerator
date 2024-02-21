@@ -53,7 +53,7 @@ python -m streamlit run frontend/front.py
 
 You should then be able to login and chat to the bot:
 
-![](login_and_chat.gif)
+![](docs/login_and_chat.gif)
 
 Right now the RAG does not have any document loaded, let's add a sample:
 ```shell
@@ -62,7 +62,7 @@ python data_sample/add_data_sample_to_rag.py
 
 The RAG now has access to the information from your loaded documents:
 
-![](query_with_knowledge.gif)
+![](docs/query_with_knowledge.gif)
 
 ## Documentation
 
