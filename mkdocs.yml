@@ -7,18 +7,33 @@ repo_url: https://github.com/artefactory/skaff-rag-accelerator
 plugins:
   - techdocs-core
 
+theme:
+  name: material
+  features:
+    - navigation.indexes
+
 markdown_extensions:
   - pymdownx.snippets:
 
 nav:
-  - Home: index.md
-  - Loading Docs in the RAG: loading_documents.md
-  - The RAG object: rag_object.md
-  - The RAGConfig object: rag_config.md
-  - Deployment: 
-    - Admin Mode: admin_mode.md
-  - Config cookbook:
-    - LLMs: recipe_llms_configs.md
-    - Vector Stores: recipe_vector_stores_configs.md
-    - Embedding Models: recipe_embedding_models_configs.md
-    - Databases: recipe_databases_configs.md
+  - Getting started: getting_started.md
+  - The frontend: frontend.md
+  - The backend:
+    - The backend: backend/backend.md
+    - RAG and RAGConfig classes: backend/rag_ragconfig.md
+    - Plugins:
+      - Plugins: backend/plugins/plugins.md
+      - Memory and sessions: backend/plugins/conversational_rag_plugin
+      - Authentication: backend/plugins/authentication.md
+      - Secure user-based sessions: backend/plugins/user_based_sessions.md
+  - The database: database.md
+  - Deployment:
+    - Admin Mode: deployment/admin_mode.md
+  - Cookbook:
+    - config.yaml recipes:
+      - LLMs: cookbook/configs/llms_configs.md
+      - Vector Stores: cookbook/configs/vector_stores_configs.md
+      - Embedding Models: cookbook/configs/embedding_models_configs.md
+      - Databases: cookbook/configs/databases_configs.md
+    - How to load documents in the RAG: cookbook/loading_documents.md
+    - How to extend the RAGConfig: cookbook/extend_ragconfig.md

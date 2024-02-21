@@ -1,17 +1,34 @@
-import os
 from logging import Logger
 from pathlib import Path
 from typing import Any, Optional
 
 import sqlglot
 from dbutils.pooled_db import PooledDB
-from dotenv import load_dotenv  # noqa
 from sqlalchemy.engine.url import make_url
 
+from backend import DATABASE_URL
 from backend.logger import get_logger
 
 POOL = None
+
+
 class Database:
+    """
+    Handles database operations.
+
+    It manages the connection pool, executes queries, and handles transactions.
+    The class uses a context manager to ensure that database connections are properly
+    opened and closed. It supports SQLite, PostgreSQL, and MySQL databases.
+
+    Attributes:
+        connection_string (str): The database connection string.
+        logger (Logger): The logger instance for logging messages.
+        url (URL): The parsed URL object of the connection string.
+        pool (PooledDB): The connection pool for database connections.
+        conn (Connection): The current database connection.
+        DIALECT_PLACEHOLDERS (dict): Mapping of database dialects to their placeholder symbols.
+    """
+
     DIALECT_PLACEHOLDERS = {
         "sqlite": "?",
         "postgresql": "%s",
@@ -19,7 +36,7 @@ class Database:
     }
 
     def __init__(self, connection_string: str = None, logger: Logger = None):
-        self.connection_string = connection_string or os.getenv("DATABASE_URL")
+        self.connection_string = connection_string or DATABASE_URL
         self.logger = logger or get_logger()
 
         self.url = make_url(self.connection_string)
@@ -82,6 +99,18 @@ class Database:
             self.logger.info(f"Database schema initialized successfully for {self.url.drivername}")
         except Exception as e:
             self.logger.exception("Schema initialization failed", exc_info=e)
+            raise
+
+    def run_script(self, path: Path):
+        try:
+            self.logger.debug(f"Running Database script at {str(path)}")
+            sql_script = path.read_text()
+            transpiled_sql = sqlglot.transpile(sql_script, read="sqlite", write=self.url.drivername.replace("postgresql", "postgres"))
+            for statement in transpiled_sql:
+                self.execute(statement)
+            self.logger.info(f"Successfuly ran script at {path} for {self.url.drivername}")
+        except Exception as e:
+            self.logger.exception(f"Failed to execute the script {path} for {self.url.drivername}", exc_info=e)
             raise
 
     def _create_pool(self) -> PooledDB:

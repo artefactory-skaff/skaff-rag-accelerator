@@ -44,10 +44,10 @@ def get_best_loader(file_extension: str, llm: BaseChatModel):
 
 
 def get_loaders() -> List[str]:
-    import langchain.document_loaders
+    import langchain_community.document_loaders
 
     loaders = []
-    for _, obj in inspect.getmembers(langchain.document_loaders):
+    for _, obj in inspect.getmembers(langchain_community.document_loaders):
         if inspect.isclass(obj):
             loaders.append(obj.__name__)
     return loaders

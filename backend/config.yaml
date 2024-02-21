@@ -1,12 +1,8 @@
 LLMConfig: &LLMConfig
-  source: AzureChatOpenAI
+  source: ChatOllama
   source_config:
-    openai_api_type: azure
-    openai_api_key: {{ OPENAI_API_KEY }}
-    openai_api_base: https://genai-ds.openai.azure.com/
-    openai_api_version: 2023-07-01-preview
-    deployment_name: gpt4
-  temperature: 0.1
+    model: tinyllama
+    temperature: 0
 
 VectorStoreConfig: &VectorStoreConfig
   source: Chroma
@@ -19,20 +15,16 @@ VectorStoreConfig: &VectorStoreConfig
   retriever_config:
     k: 20
     score_threshold: 0.5
-
   insertion_mode: null
 
 EmbeddingModelConfig: &EmbeddingModelConfig
-  source: OpenAIEmbeddings
+  source: HuggingFaceEmbeddings
   source_config:
-    openai_api_type: azure
-    openai_api_key: {{ EMBEDDING_API_KEY }}
-    openai_api_base: https://poc-openai-artefact.openai.azure.com/
-    deployment: embeddings
+    model_name: BAAI/bge-base-en-v1.5
     chunk_size: 500
 
 DatabaseConfig: &DatabaseConfig
-  database_url: {{ DATABASE_URL }}
+  database_url: sqlite:///database/rag.sqlite3
 
 RagConfig:
   llm: *LLMConfig

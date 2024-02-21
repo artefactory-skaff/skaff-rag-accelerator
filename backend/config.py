@@ -5,60 +5,57 @@ from pathlib import Path
 import yaml
 from dotenv import load_dotenv
 from jinja2 import Template
-from langchain.chat_models.base import BaseChatModel
 from langchain.schema.embeddings import Embeddings
 from langchain.vectorstores import VectorStore
+from langchain_core.language_models import LLM
+from langchain_core.language_models.chat_models import BaseChatModel
 
 load_dotenv()
 
 @dataclass
 class LLMConfig:
-    source: BaseChatModel | str = "AzureChatOpenAI"
-    source_config: dict = field(default_factory=lambda: {
-        "openai_api_type": "azure",
-        "openai_api_base": "https://poc-genai-gpt4.openai.azure.com/",
-        "openai_api_version": "2023-07-01-preview",
-        "openai_api_key": os.environ.get("OPENAI_API_KEY"),
-        "deployment_name": "gpt4v",
-    })
-
-    temperature: float = 0.1
+    source: BaseChatModel | LLM | str
+    source_config: dict
 
 @dataclass
 class VectorStoreConfig:
-    source: VectorStore | str = "Chroma"
-    source_config: dict = field(default_factory=lambda: {
-        "persist_directory": "vector_database/",
-        "collection_metadata": {
-            "hnsw:space": "cosine"
-        }
-    })
+    source: VectorStore | str
+    source_config: dict
 
-    retriever_search_type: str = "similarity"
-    retriever_config: dict = field(default_factory=lambda: {
-        "top_k": 20,
-        "score_threshold": 0.5
-    })
-
-    insertion_mode: str = "full"  # "None", "full", "incremental"
+    retriever_search_type: str
+    retriever_config: dict
+    insertion_mode: str  # "None", "full", "incremental"
 
 @dataclass
 class EmbeddingModelConfig:
-    source: Embeddings | str = "OpenAIEmbeddings"
-    source_config: dict = field(default_factory=lambda: {
-        "openai_api_type": "azure",
-        "openai_api_base": "https://poc-openai-artefact.openai.azure.com/",
-        "openai_api_key": os.environ.get("EMBEDDING_API_KEY"),
-        "deployment": "embeddings",
-        "chunk_size": 500,
-    })
+    source: Embeddings | str
+    source_config: dict
 
 @dataclass
 class DatabaseConfig:
-    database_url: str = os.environ.get("DATABASE_URL")
+    database_url: str
 
 @dataclass
 class RagConfig:
+    """
+    Configuration class for the Retrieval-Augmented Generation (RAG) system.
+    It is meant to be injected in the RAG class to configure the various components.
+
+    This class holds the configuration for the various components that make up the RAG system, including
+    the language model, vector store, embedding model, and database configurations. It provides a method
+    to construct a RagConfig instance from a YAML file, allowing for easy external configuration.
+
+    Attributes:
+        llm (LLMConfig): Configuration for the language model component.
+        vector_store (VectorStoreConfig): Configuration for the vector store component.
+        embedding_model (EmbeddingModelConfig): Configuration for the embedding model component.
+        database (DatabaseConfig): Configuration for the database connection.
+
+    Methods:
+        from_yaml: Class method to create an instance of RagConfig from a YAML file, with optional environment
+                   variables for template rendering.
+    """
+
     llm:                      LLMConfig             = field(default_factory=LLMConfig)
     vector_store:             VectorStoreConfig     = field(default_factory=VectorStoreConfig)
     embedding_model:          EmbeddingModelConfig  = field(default_factory=EmbeddingModelConfig)

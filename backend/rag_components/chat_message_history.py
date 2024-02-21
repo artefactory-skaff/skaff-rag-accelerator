@@ -1,23 +1,38 @@
 
-from langchain.memory import ConversationBufferWindowMemory
+from datetime import datetime
+
 from langchain_community.chat_message_histories import SQLChatMessageHistory
+from langchain_community.chat_message_histories.sql import DefaultMessageConverter
+from sqlalchemy import Column, DateTime, Integer, Text
 
 from backend.config import RagConfig
 
+try:
+    from sqlalchemy.orm import declarative_base
+except ImportError:
+    from sqlalchemy.ext.declarative import declarative_base
+
 TABLE_NAME = "message_history"
 
-
-def get_conversation_buffer_memory(config: RagConfig, chat_id) -> ConversationBufferWindowMemory:
-    return ConversationBufferWindowMemory(
-        memory_key="chat_history",
-        chat_memory=get_chat_message_history(config, chat_id),
-        return_messages=True,
-        k=config.chat_history_window_size,
-    )
 
 def get_chat_message_history(config: RagConfig, chat_id):
     return SQLChatMessageHistory(
         session_id=chat_id,
         connection_string=config.database.database_url,
         table_name=TABLE_NAME,
+        custom_message_converter=TimestampedMessageConverter(TABLE_NAME),
     )
+
+class TimestampedMessageConverter(DefaultMessageConverter):
+    def __init__(self, table_name: str):
+        self.model_class = create_message_model(table_name, declarative_base())
+
+def create_message_model(table_name, dynamic_base):
+    class Message(dynamic_base):
+        __tablename__ = table_name
+        id = Column(Integer, primary_key=True)
+        timestamp = Column(DateTime, default=datetime.utcnow)
+        session_id = Column(Text)
+        message = Column(Text)
+
+    return Message
