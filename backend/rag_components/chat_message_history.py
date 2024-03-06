@@ -27,6 +27,7 @@ class TimestampedMessageConverter(DefaultMessageConverter):
     def __init__(self, table_name: str):
         self.model_class = create_message_model(table_name, declarative_base())
 
+
 def create_message_model(table_name, dynamic_base):
     class Message(dynamic_base):
         __tablename__ = table_name

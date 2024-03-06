@@ -22,8 +22,6 @@ class VectorStoreConfig:
     source: VectorStore | str
     source_config: dict
 
-    retriever_search_type: str
-    retriever_config: dict
     insertion_mode: str  # "None", "full", "incremental"
 
 @dataclass

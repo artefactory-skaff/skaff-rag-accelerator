@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - ADMIN_MODE=1
+      - PYTHONPATH=.
+      - DATABASE_URL=sqlite:///database/rag.sqlite3
+    volumes:
+      - ./database:/app/database
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      - PORT=9000
+      - ADMIN_MODE=1
+      - PYTHONPATH=.
+      - BACKEND_URL=http://backend:8000/
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

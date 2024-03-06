@@ -21,7 +21,8 @@ nav:
   - The backend:
     - The backend: backend/backend.md
     - RAG and RAGConfig classes: backend/rag_ragconfig.md
-    - Plugins:
+    - Chains and chain links: backend/chains/chains.md
+    - API Plugins:
       - Plugins: backend/plugins/plugins.md
       - Memory and sessions: backend/plugins/conversational_rag_plugin
       - Authentication: backend/plugins/authentication.md

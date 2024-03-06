@@ -1,4 +1,4 @@
-The backend in stateless, it does not retain information about previous requests. There is no stored knowledge of, or reference to past transactions in the backend itself. Instead all this state knowledge is handled by a database.
+The backend is stateless, it does not retain information about previous requests. There is no stored knowledge of, or reference to past transactions in the backend itself. Instead, all this state knowledge is handled by a database.
 
 In the medium/long term, stateless backends are a much simpler paradigm. They are much easier to develop, test, and debug since all requests are self-contained, with all the side effects are stored on the DB. They also scale to multiple instances much better since any query can be responded to by any instance of the backend.
 

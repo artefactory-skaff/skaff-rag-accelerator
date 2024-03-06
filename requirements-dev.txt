@@ -1,0 +1,7 @@
+-r frontend/requirements.txt
+-r backend/requirements.txt
+mkdocs
+mkdocs_monorepo_plugin
+pymdown-extensions
+mkdocs-pymdownx-material-extras
+mkdocs-techdocs-core

@@ -6,11 +6,14 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 ## Features
 
 - A configurable RAG setup based around Langchain ([Check out the configuration cookbook here](cookbook/cookbook.md))
-- `RAG` and `RagConfig` python classes to help you set things up
+- `RAG` and `RagConfig` python classes that manage components (vector store, llm, retreiver, ...)
 - A REST API based on Langserve + FastAPI to provide easy access to the RAG as a web backend
+- Optional API plugins for secure user authentication, session management, ...
+- `Chain links` primitive that facilitates chain building and allows documentation generation
 - A demo Streamlit to serve as a basic working frontend
+- `Dockerfiles` and `docker-compose` to make deployments easier and more flexible
 - A document loader for the RAG
-- Optional plugins for secure user authentication and session management
+
 
 ## Quickstart
 
@@ -26,14 +29,38 @@ Duration: ~15 minutes.
 - A few GB of disk space to host the models
 - Tested with python 3.11 (may work with other versions)
 
+### Run using docker compose
+
+If you have docker installed and running you can run the whole RAG app using it. [Otherwise, skip to the "Run directly" section](index.md#run-directly)
+
 Start the LLM server:
-```python
+```shell
+ollama run tinyllama
+```
+
+Start the service:
+```shell
+docker compose up -d
+```
+
+Make sure both the front and back are alive:
+```shell
+docker ps
+```
+You should see two containers with status `Up X minutes`.
+
+Go to http://localhost:9000/ to query your RAG.
+
+### Run directly
+
+Start the LLM server:
+```shell
 ollama run tinyllama
 ```
 
 In a fresh env:
 ```shell
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 You will need to set some env vars, either in a .env file at the project root, or just by exporting them like so:
@@ -51,6 +78,8 @@ Start the frontend demo
 ```shell
 python -m streamlit run frontend/front.py
 ```
+
+### Querying and loading the RAG
 
 You should then be able to login and chat to the bot:
 

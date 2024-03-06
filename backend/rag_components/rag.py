@@ -7,17 +7,19 @@ from langchain.docstore.document import Document
 from langchain.indexes import SQLRecordManager, index
 from langchain.schema.embeddings import Embeddings
 from langchain.vectorstores import VectorStore
+from langchain_core.retrievers import BaseRetriever
 from langchain.vectorstores.utils import filter_complex_metadata
 
 from backend.config import RagConfig
 from backend.database import Database
 from backend.logger import get_logger
-from backend.rag_components.chain import get_base_chain, get_memory_chain
 from backend.rag_components.document_loader import get_documents
 from backend.rag_components.embedding import get_embedding_model
 from backend.rag_components.llm import get_llm_model
+from backend.rag_components.retriever import get_retriever
 from backend.rag_components.vector_store import get_vector_store
-
+from backend.rag_components.chain_links.rag_basic import rag_basic
+from backend.rag_components.chain_links.rag_with_history import rag_with_history_chain
 
 class RAG:
     """
@@ -50,12 +52,13 @@ class RAG:
         self.llm: BaseChatModel = get_llm_model(self.config)
         self.embeddings: Embeddings = get_embedding_model(self.config)
         self.vector_store: VectorStore = get_vector_store(self.embeddings, self.config)
+        self.retriever: BaseRetriever = get_retriever(self.vector_store)
 
     def get_chain(self, memory: bool = False):
         if memory:
-            chain = get_memory_chain(self.config, self.vector_store)
+            chain = rag_with_history_chain(self.config, self.llm, self.retriever)
         else:
-            chain = get_base_chain(self.config, self.vector_store)
+            chain = rag_basic(self.llm, self.retriever)
         return chain
 
 

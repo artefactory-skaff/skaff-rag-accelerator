@@ -1,0 +1,10 @@
+extra_streamlit_components
+humanize
+langserve
+fastapi
+Pillow
+python-dotenv
+Requests
+streamlit
+httpx_sse
+pydantic==1.*

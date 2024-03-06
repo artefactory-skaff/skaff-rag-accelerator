@@ -3,6 +3,7 @@ LLMConfig: &LLMConfig
   source_config:
     model: tinyllama
     temperature: 0
+    # base_url: http://host.docker.internal:11434  # Uncomment this line if you are running the RAG through Docker Compose
 
 VectorStoreConfig: &VectorStoreConfig
   source: Chroma
@@ -11,10 +12,6 @@ VectorStoreConfig: &VectorStoreConfig
     collection_metadata:
       hnsw:space: cosine
 
-  retriever_search_type: similarity_score_threshold
-  retriever_config:
-    k: 20
-    score_threshold: 0.5
   insertion_mode: null
 
 EmbeddingModelConfig: &EmbeddingModelConfig
