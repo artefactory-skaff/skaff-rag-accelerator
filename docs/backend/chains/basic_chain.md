@@ -15,7 +15,6 @@ Question: {question}
 
 ### Input: str
 
-
 ### Output: Response
 
 | Name         | Type   | Required   | Default   |
@@ -24,28 +23,7 @@ Question: {question}
 
 
 
-
-
-## Sub-chains
-
-<details markdown><summary>RunnableParallel</summary>
-## RunnableParallel
-
-
-
-### Input: Question
-
-| Name         | Type   | Required   | Default   |
-|--------------|--------|------------|-----------|
-| **question** | str    | True       |           |
-
-
-
-### Output: Dict
-
-
-
-## Sub-chains
+## Sub-chain
 
 <details markdown><summary>Fetch documents</summary>
 ## Fetch documents
@@ -67,18 +45,12 @@ This chain fetches the relevant documents and combines them into a single string
 
 
 
-
 ### Output: Documents
 
 | Name          | Type   | Required   | Default   |
 |---------------|--------|------------|-----------|
 | **documents** | str    | True       |           |
 
-
-
-
-
-</details>
 
 
 </details>

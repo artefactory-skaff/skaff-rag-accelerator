@@ -32,4 +32,3 @@ def rag_basic(llm, retriever: BaseRetriever) -> DocumentedRunnable:
     )
     typed_chain = chain.with_types(input_type=str, output_type=Response)
     return DocumentedRunnable(typed_chain, chain_name="Answer questions from documents stored in a vector store", prompt=prompt, user_doc=__doc__)
-

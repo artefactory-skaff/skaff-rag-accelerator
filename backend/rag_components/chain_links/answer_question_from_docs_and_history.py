@@ -5,7 +5,6 @@ from backend.rag_components.chain_links.rag_basic import rag_basic
 from backend.rag_components.chain_links.condense_question import condense_question
 
 from backend.rag_components.chain_links.documented_runnable import DocumentedRunnable
-from backend.rag_components.chain_links.retrieve_and_format_docs import fetch_docs_chain
 
 
 class QuestionWithHistory(BaseModel):

@@ -5,7 +5,6 @@ This chain answers the provided question based on documents it retreives and the
 
 ### Input: Dict
 
-
 ### Output: Response
 
 | Name         | Type   | Required   | Default   |
@@ -14,12 +13,12 @@ This chain answers the provided question based on documents it retreives and the
 
 
 
+## Sub-chain
 
+<details markdown><summary>Answer question from docs and history</summary>
+## Answer question from docs and history
 
-## Sub-chains
-
-<details markdown><summary>DocumentedRunnable</summary>
-## DocumentedRunnable
+This chain answers the provided question based on documents it retreives and the conversation history
 
 
 
@@ -32,6 +31,29 @@ This chain answers the provided question based on documents it retreives and the
 
 
 
+### Output: Response
+
+| Name         | Type   | Required   | Default   |
+|--------------|--------|------------|-----------|
+| **response** | str    | True       |           |
+
+
+
+## Sub-chain
+
+<details markdown><summary>RunnableSequence</summary>
+## RunnableSequence
+
+
+
+### Input: QuestionWithChatHistory
+
+| Name             | Type   | Required   | Default   |
+|------------------|--------|------------|-----------|
+| **question**     | str    | True       |           |
+| **chat_history** | str    | True       |           |
+
+
 
 ### Output: Response
 
@@ -41,9 +63,7 @@ This chain answers the provided question based on documents it retreives and the
 
 
 
-
-
-## Sub-chains
+## These chains run in sequence
 
 <details markdown><summary>Condense question and history</summary>
 ## Condense question and history
@@ -77,14 +97,11 @@ Question: {question}
 
 
 
-
 ### Output: StandaloneQuestion
 
 | Name                    | Type   | Required   | Default   |
 |-------------------------|--------|------------|-----------|
 | **standalone_question** | str    | True       |           |
-
-
 
 
 
@@ -108,7 +125,6 @@ Question: {question}
 
 ### Input: str
 
-
 ### Output: Response
 
 | Name         | Type   | Required   | Default   |
@@ -117,28 +133,7 @@ Question: {question}
 
 
 
-
-
-## Sub-chains
-
-<details markdown><summary>RunnableParallel</summary>
-## RunnableParallel
-
-
-
-### Input: Question
-
-| Name         | Type   | Required   | Default   |
-|--------------|--------|------------|-----------|
-| **question** | str    | True       |           |
-
-
-
-### Output: Dict
-
-
-
-## Sub-chains
+## Sub-chain
 
 <details markdown><summary>Fetch documents</summary>
 ## Fetch documents
@@ -160,14 +155,11 @@ This chain fetches the relevant documents and combines them into a single string
 
 
 
-
 ### Output: Documents
 
 | Name          | Type   | Required   | Default   |
 |---------------|--------|------------|-----------|
 | **documents** | str    | True       |           |
-
-
 
 
 

@@ -1,10 +1,67 @@
-from typing import Any, Optional
+from __future__ import annotations
+import json
+from typing import Any, List, Optional
 from docdantic import get_field_info
-from langchain_core.runnables.base import Runnable, RunnableBinding, RunnableBindingBase, RunnableSequence, RunnableParallel, RunnableConfig
+from langchain_core.runnables.base import Runnable, RunnableBinding, RunnableBindingBase, RunnableSequence, RunnableParallel
 from langchain_core.runnables.utils import Input, Output
 from pydantic.main import ModelMetaclass
 import tabulate
 from jinja2 import Template
+
+
+from dataclasses import asdict, dataclass
+from typing import Optional, Any
+
+
+@dataclass
+class RunnableSequenceDocumentation:
+    docs: List[RunnableDocumentation]
+
+@dataclass
+class RunnableParallelDocumentation:
+    docs: List[RunnableDocumentation]
+
+@dataclass
+class RunnableBindingDocumentation:
+    docs: List[RunnableDocumentation]
+
+@dataclass
+class RunnableDocumentation:
+    chain_name: str
+    prompt: Optional[str] = None
+    input_type: Optional[Any] = None
+    output_type: Optional[Any] = None
+    user_doc: Optional[str] = None
+    sub_docs: Optional[Any] = None
+
+    def to_json(self):
+        class EnhancedJSONEncoder(json.JSONEncoder):
+            def default(self, o):
+                return o.__name__
+        
+        return json.dumps(asdict(self), cls=EnhancedJSONEncoder)
+    
+    def to_markdown(self) -> str:
+        rendered_sub_docs = ""
+        if self.sub_docs:
+            if isinstance(self.sub_docs, RunnableSequenceDocumentation):
+                template = sequence_chains_template
+            elif isinstance(self.sub_docs, RunnableParallelDocumentation):
+                template = parallel_chains_template
+            elif isinstance(self.sub_docs, RunnableBindingDocumentation):
+                template = binding_chains_template
+
+            sub_docs_markdown = [doc.to_markdown() for doc in self.sub_docs.docs]
+            rendered_sub_docs = Template(template).render(docs=sub_docs_markdown)
+
+        input_doc, output_doc = render_io_doc(self.input_type, self.output_type)
+        return Template(markdown_doc_template).render(
+            chain_name=self.chain_name,
+            prompt=self.prompt,
+            io_doc=input_doc + "\n" + output_doc,
+            sub_docs=rendered_sub_docs,
+            user_doc=self.user_doc
+        )
 
 
 class DocumentedRunnable(RunnableBindingBase[Input, Output]):
@@ -27,7 +84,7 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
         user_doc (Optional[str]): Any additional documentation you want displayed in the documentation.
     """
 
-    documentation: str
+    documentation: RunnableDocumentation | None
 
     def __init__(
         self, 
@@ -37,39 +94,62 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
         user_doc: Optional[str]=None,
         **kwargs: Any,
     ) -> None:
-
-        io_doc = render_io_doc(runnable)
-        custom_input_type = runnable.input_schema
-        custom_output_type = runnable.output_schema
-
-        if hasattr(runnable, 'bound'):
-            runnable = runnable.bound
-    
-        chain_name = chain_name or type(runnable).__name__
+        
+        custom_input_type = runnable.InputType
+        custom_output_type = runnable.OutputType
+        final_chain_name = chain_name or type(runnable).__name__
 
         if isinstance(runnable, RunnableSequence):
             sub_docs = [runnable.documentation if isinstance(runnable, DocumentedRunnable) else DocumentedRunnable(runnable).documentation for runnable in runnable.steps]
             sub_docs = [doc for doc in sub_docs if doc]
-            documentation = render_documentation(chain_name, prompt, io_doc, sub_docs, user_doc)
+            if len(sub_docs) >= 2:
+                documentation = RunnableDocumentation(
+                    chain_name=final_chain_name,
+                    prompt=prompt,
+                    input_type=custom_input_type,
+                    output_type=custom_output_type,
+                    user_doc=user_doc,
+                    sub_docs=RunnableSequenceDocumentation(docs=sub_docs)
+                )
+            else:
+                documentation = sub_docs[0] if len(sub_docs) else None
         
         elif isinstance(runnable, RunnableParallel):
             sub_docs = [runnable.documentation if isinstance(runnable, DocumentedRunnable) else DocumentedRunnable(runnable).documentation for runnable in runnable.steps.values()]
             sub_docs = [doc for doc in sub_docs if doc]
-            documentation = render_documentation(chain_name, prompt, io_doc, sub_docs, user_doc)
-        
-        elif isinstance(runnable, DocumentedRunnable):
-            sub_docs = [runnable.documentation if isinstance(runnable, DocumentedRunnable) else DocumentedRunnable(runnable).documentation for _, runnable in runnable.bound if runnable]
+            if len(sub_docs) >= 2:
+                documentation = RunnableDocumentation(
+                    chain_name=final_chain_name,
+                    prompt=prompt,
+                    input_type=custom_input_type,
+                    output_type=custom_output_type,
+                    user_doc=user_doc,
+                    sub_docs=RunnableParallelDocumentation(docs=sub_docs)
+                )
+            else:
+                documentation = sub_docs[0] if len(sub_docs) else None
+
+        elif hasattr(runnable, "bound"):
+            bound_runnable = runnable.bound
+            while isinstance(bound_runnable, RunnableBinding):
+                bound_runnable = bound_runnable.bound
+
+            sub_docs = [bound_runnable.documentation if isinstance(bound_runnable, DocumentedRunnable) else DocumentedRunnable(bound_runnable).documentation]
             sub_docs = [doc for doc in sub_docs if doc]
-            documentation = render_documentation(chain_name, prompt, io_doc, sub_docs, user_doc=user_doc)
-        
-        elif isinstance(runnable, RunnableBinding):
-            lel = runnable.bound.steps
-            sub_docs = [runnable.documentation if isinstance(runnable, DocumentedRunnable) else DocumentedRunnable(runnable).documentation for runnable in runnable.bound.steps if runnable]
-            sub_docs = [doc for doc in sub_docs if doc]
-            documentation = render_documentation(chain_name, prompt, io_doc, sub_docs, user_doc)
-        
+            
+            if final_chain_name == "RunnableBinding":
+                documentation = sub_docs[0] if len(sub_docs) else None
+            else:
+                documentation = RunnableDocumentation(
+                    chain_name=final_chain_name,
+                    prompt=prompt,
+                    input_type=custom_input_type,
+                    output_type=custom_output_type,
+                    user_doc=user_doc,
+                    sub_docs=RunnableBindingDocumentation(docs=sub_docs) if len(sub_docs) else None
+                )
         else:
-            documentation = ""
+            documentation = None
 
         super().__init__(
             bound=runnable, 
@@ -79,23 +159,21 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
             **kwargs,
         )
 
-
-def render_io_doc(runnable: Runnable) -> str:
-    if isinstance(runnable.InputType, ModelMetaclass):
-        input_doc = render_model_doc(runnable.InputType, "Input")
+def render_io_doc(input, output) -> tuple[str]:
+    if isinstance(input, ModelMetaclass):
+        input_doc = render_model_doc(input, "Input")
     else:
-        input_doc = f"### Input: {runnable.InputType.__name__}"
+        input_doc = f"### Input: {input.__name__}"
     
-    if isinstance(runnable.OutputType, ModelMetaclass):
-        output_doc = render_model_doc(runnable.OutputType, "Output")
+    if isinstance(output, ModelMetaclass):
+        output_doc = render_model_doc(output, "Output")
     else:
-        output_doc = f"### Output: {runnable.OutputType.__name__}"
+        output_doc = f"### Output: {output.__name__}"
 
-    io_doc = f"""{input_doc}\n\n{output_doc}\n\n"""
-    return io_doc
+    return input_doc, output_doc
 
 
-def render_model_doc(model, input_or_output: str) -> str:
+def render_model_doc(model: ModelMetaclass, input_or_output: str) -> str:
     field_info = get_field_info(model)
 
     tables = {
@@ -116,8 +194,7 @@ def render_model_doc(model, input_or_output: str) -> str:
     )
 
 
-def render_documentation(chain_name, prompt, io_doc, sub_docs=None, user_doc=None):
-    template_str = """## {{ chain_name }}
+markdown_doc_template = """## {{ chain_name }}
 {% if user_doc %}
 {{ user_doc }}
 {% endif %}
@@ -129,18 +206,30 @@ def render_documentation(chain_name, prompt, io_doc, sub_docs=None, user_doc=Non
 {% endif %}
 {{ io_doc }}
 {% if sub_docs %}
-## Sub-chains
-{% for doc in sub_docs %}
+{{ sub_docs }}
+{% endif %}
+"""
+
+parallel_chains_template = """## These chains run in parallel
+{% for doc in docs %}
 <details markdown><summary>{{ doc.splitlines()[0].replace('#', '').strip() }}</summary>
 {{ doc }}
 </details>
 {% endfor %}
-{% endif %}"""
-    template = Template(template_str)
-    return template.render(
-        chain_name=chain_name,
-        prompt=prompt,
-        io_doc=io_doc,
-        sub_docs=sub_docs,
-        user_doc=user_doc
-    )
+"""
+
+sequence_chains_template = """## These chains run in sequence
+{% for doc in docs %}
+<details markdown><summary>{{ doc.splitlines()[0].replace('#', '').strip() }}</summary>
+{{ doc }}
+</details>
+{% endfor %}
+"""
+
+binding_chains_template = """## Sub-chain
+{% for doc in docs %}
+<details markdown><summary>{{ doc.splitlines()[0].replace('#', '').strip() }}</summary>
+{{ doc }}
+</details>
+{% endfor %}
+"""
