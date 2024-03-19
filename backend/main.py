@@ -11,7 +11,6 @@ from backend.rag_components.rag import RAG
 rag = RAG(config=Path(__file__).parent / "config.yaml")
 chain = rag.get_chain()
 
-
 # Create a minimal RAG server based on langserve
 # Learn how to extend this configuration to add authentication and session management
 # https://artefactory.github.io/skaff-rag-accelerator/backend/plugins/plugins/

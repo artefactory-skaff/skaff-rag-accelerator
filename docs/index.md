@@ -17,26 +17,23 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 
 ## Quickstart
 
-This quickstart will guide you through the steps to serve a RAG fully locally. You will run the API backend and frontend on your machine, which should allow you to run your first queries against the RAG.
+This quickstart will guide you through the steps to serve the RAG and load a few documents. 
 
-For this exemple, we will be using the `tinyllama` LLM, the `BAAI/bge-base-en-v1.5` embedding model, and Chroma for the vector store. This allows this setup to be fully local, and independent of any external API (and thus, free). However, the relevance of answers will not be impressive.
+You will run both the back and front on your machine.
+
+For this exemple, we will be using GPT4, the `BAAI/bge-base-en-v1.5` embedding model, and Chroma for the vector store.
 
 Duration: ~15 minutes.
 
 ### Pre-requisites
 
-- Ollama, to serve the LLM locally ([Download and install](https://ollama.com/))
-- A few GB of disk space to host the models
+- An `OPENAI_API_KEY` for the Artefact GPT-4 deployment on Azure. Contact alexis.vialaret@artefact.com if you do not have one.
+- A few GB of disk space
 - Tested with python 3.11 (may work with other versions)
 
 ### Run using docker compose
 
 If you have docker installed and running you can run the whole RAG app using it. [Otherwise, skip to the "Run directly" section](index.md#run-directly)
-
-Start the LLM server:
-```shell
-ollama run tinyllama
-```
 
 Start the service:
 ```shell
@@ -52,11 +49,6 @@ You should see two containers with status `Up X minutes`.
 Go to http://localhost:9000/ to query your RAG.
 
 ### Run directly
-
-Start the LLM server:
-```shell
-ollama run tinyllama
-```
 
 In a fresh env:
 ```shell
@@ -79,20 +71,9 @@ Start the frontend demo
 python -m streamlit run frontend/front.py
 ```
 
-### Querying and loading the RAG
+### Loading documents in the RAG
 
-You should then be able to login and chat to the bot:
-
-![](login_and_chat.gif)
-
-Right now the RAG does not have any document loaded, let's add a sample:
-```shell
-python data_sample/add_data_sample_to_rag.py
-```
-
-The RAG now has access to the information from your loaded documents:
-
-![](query_with_knowledge.gif)
+Right now the RAG does not have any documents loaded, you can use the notebook in the `examples` folder to transform a file into documents and load them in the vector store.
 
 ## Documentation
 

@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Union
 
-import sqlalchemy
 from langchain.chat_models.base import BaseChatModel
 from langchain.docstore.document import Document
 from langchain.indexes import SQLRecordManager, index
@@ -67,25 +66,26 @@ class RAG:
         filtered_documents = filter_complex_metadata(documents)
         return self.load_documents(filtered_documents)
 
-    def load_documents(self, documents: List[Document], insertion_mode: str = None):
+    def load_documents(self, documents: List[Document], insertion_mode: str = None, namespace: str = "default"):
         insertion_mode = insertion_mode or self.config.vector_store.insertion_mode
 
         record_manager = SQLRecordManager(
-            namespace="vector_store/my_docs", db_url=self.config.database.database_url
+            namespace=namespace, db_url=self.config.database.database_url
         )
 
-        try:
-            record_manager.create_schema()
-        except sqlalchemy.exc.OperationalError:
-            with Database() as connection:
-                connection.initialize_schema()
-            record_manager.create_schema()
+        record_manager.create_schema()
 
-        indexing_output = index(
-            documents,
-            record_manager,
-            self.vector_store,
-            cleanup=insertion_mode,
-            source_id_key="source",
-        )
-        self.logger.info({"event": "load_documents", **indexing_output})
+        self.logger.info(f"Indexing {len(documents)} documents.")
+
+        batch_size = 100
+        for batch in range(0, len(documents), batch_size):
+            self.logger.info(f"Indexing batch {batch} to {min(len(documents), batch + batch_size)}.")
+
+            indexing_output = index(
+                documents[batch : min(len(documents), batch + batch_size)],
+                record_manager,
+                self.vector_store,
+                cleanup=insertion_mode,
+                source_id_key="source",
+            )
+            self.logger.info({"event": "load_documents", **indexing_output})
