@@ -1,0 +1,29 @@
+spec_version: 1
+
+# Everyting in this file will be used to populate the catalog on skaff.artefact.com
+# It is also vectorized as is for the search, so make sure to provide relevant keywords
+
+name: GenAI RAG indus kit
+owner: alexis.vialaret@artefact.com
+description: >
+  Deploy production grade RAGs quickly, on any cloud.
+documentation_url: https://artefactory.github.io/skaff-rag-accelerator/
+
+type: deployable   # deployable, knowldege pack
+lifecycle: prototype  # prototype, production
+
+users:                 # DS, DA, DE
+  - DS
+  - DE
+
+clouds: []             # aws, gcp, azure, databricks
+
+technologies:          # python, dbt, terraform, airbyte, ...
+  - langchain
+  - FastAPI
+  - streamlit
+  - langserve
+
+expertises:            # MMM, forecasting, ELT, release engineering, ...
+  - GenAI
+  - LLMOps
