@@ -3,7 +3,7 @@ LLMConfig: &LLMConfig
   source_config:
     openai_api_type: azure
     openai_api_key: {{ OPENAI_API_KEY }}
-    openai_api_base: https://genai-ds.openai.azure.com/openai/deployments/gpt4
+    openai_api_base: https://genai-ds.openai.azure.com/openai/deployments/gpt4-turbo
     openai_api_version: 2023-07-01-preview
     temperature: 0.1
 
@@ -17,9 +17,11 @@ VectorStoreConfig: &VectorStoreConfig
   insertion_mode: null
 
 EmbeddingModelConfig: &EmbeddingModelConfig
-  source: HuggingFaceEmbeddings
+  source: AzureOpenAIEmbeddings
   source_config:
-    model_name: BAAI/bge-base-en-v1.5
+    openai_api_type: azure
+    openai_api_key: {{ OPENAI_API_KEY }}
+    openai_api_base: https://genai-ds.openai.azure.com/openai/deployments/ada
     chunk_size: 500
 
 DatabaseConfig: &DatabaseConfig

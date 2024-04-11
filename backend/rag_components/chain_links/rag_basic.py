@@ -1,8 +1,10 @@
 """This chain answers the provided question based on documents it retreives."""
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.retrievers import BaseRetriever
 from langchain_core.runnables import RunnablePassthrough
 from pydantic import BaseModel
+from langchain_core.output_parsers import StrOutputParser
 
 from backend.rag_components.chain_links.documented_runnable import DocumentedRunnable
 from backend.rag_components.chain_links.retrieve_and_format_docs import fetch_docs_chain
@@ -13,7 +15,7 @@ As a chatbot assistant, your mission is to respond to user inquiries in a precis
 Context: {relevant_documents}
 
 Question: {question}
-""" # noqa: E501
+"""  # noqa: E501
 
 
 class Question(BaseModel):
@@ -26,9 +28,11 @@ class Response(BaseModel):
 
 def rag_basic(llm, retriever: BaseRetriever) -> DocumentedRunnable:
     chain = (
-        {"relevant_documents": fetch_docs_chain(retriever), "question": RunnablePassthrough(Question)}
+        {"relevant_documents": fetch_docs_chain(retriever), "question": RunnablePassthrough()}
         | ChatPromptTemplate.from_template(prompt)
         | llm
     )
     typed_chain = chain.with_types(input_type=str, output_type=Response)
-    return DocumentedRunnable(typed_chain, chain_name="Answer questions from documents stored in a vector store", prompt=prompt, user_doc=__doc__)
+    return DocumentedRunnable(
+        typed_chain, chain_name="Answer questions from documents stored in a vector store", prompt=prompt, user_doc=__doc__
+    )
