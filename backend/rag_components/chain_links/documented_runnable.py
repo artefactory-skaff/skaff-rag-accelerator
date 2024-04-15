@@ -1,29 +1,37 @@
 from __future__ import annotations
+
 import json
+from dataclasses import asdict, dataclass
 from typing import Any, List, Optional
+
+import tabulate
 from docdantic import get_field_info
-from langchain_core.runnables.base import Runnable, RunnableBinding, RunnableBindingBase, RunnableSequence, RunnableParallel
+from jinja2 import Template
+from langchain_core.runnables.base import (
+    Runnable,
+    RunnableBinding,
+    RunnableBindingBase,
+    RunnableParallel,
+    RunnableSequence,
+)
 from langchain_core.runnables.utils import Input, Output
 from pydantic.main import ModelMetaclass
-import tabulate
-from jinja2 import Template
-
-
-from dataclasses import asdict, dataclass
-from typing import Optional, Any
 
 
 @dataclass
 class RunnableSequenceDocumentation:
     docs: List[RunnableDocumentation]
 
+
 @dataclass
 class RunnableParallelDocumentation:
     docs: List[RunnableDocumentation]
 
+
 @dataclass
 class RunnableBindingDocumentation:
     docs: List[RunnableDocumentation]
+
 
 @dataclass
 class RunnableDocumentation:
@@ -38,9 +46,9 @@ class RunnableDocumentation:
         class EnhancedJSONEncoder(json.JSONEncoder):
             def default(self, o):
                 return o.__name__
-        
+
         return json.dumps(asdict(self), cls=EnhancedJSONEncoder)
-    
+
     def to_markdown(self) -> str:
         rendered_sub_docs = ""
         if self.sub_docs:
@@ -60,19 +68,21 @@ class RunnableDocumentation:
             prompt=self.prompt,
             io_doc=input_doc + "\n" + output_doc,
             sub_docs=rendered_sub_docs,
-            user_doc=self.user_doc
+            user_doc=self.user_doc,
         )
 
 
 class DocumentedRunnable(RunnableBindingBase[Input, Output]):
     """A DocumentedRunnable is a wrapper around a Runnable that generates documentation.
 
-    FIXME: Bound runnables that have configurable fields are not handled correctly, causing the playground to not be properly usable.
+    FIXME: Bound runnables that have configurable fields are not handled correctly,
+        causing the playground to not be properly usable.
     TODO: Add Mermaid diagrams.
 
-    This class is used to create a documented version of a Runnable, which is an executable
-    unit of work in the langchain framework. The documentation includes information about
-    the input and output types, as well as any additional user-provided prompts or documentation.
+    This class is used to create a documented version of a Runnable, which is an
+    executable unit of work in the langchain framework. The documentation includes
+    information about the input and output types, as well as any additional
+    user-provided prompts or documentation.
 
     Attributes:
         documentation (str): The generated markdown documentation for the Runnable.
@@ -81,26 +91,33 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
         runnable (Runnable): The Runnable to be documented.
         chain_name (Optional[str]): The name of the chain that the Runnable belongs to.
         prompt (Optional[str]): The prompt that the Runnable uses, if applicable.
-        user_doc (Optional[str]): Any additional documentation you want displayed in the documentation.
+        user_doc (Optional[str]): Any additional documentation you want displayed in the
+            documentation.
     """
 
     documentation: RunnableDocumentation | None
 
     def __init__(
-        self, 
-        runnable: Runnable[Input, Output], 
-        chain_name: Optional[str]=None, 
-        prompt: Optional[str]=None, 
-        user_doc: Optional[str]=None,
+        self,
+        runnable: Runnable[Input, Output],
+        chain_name: Optional[str] = None,
+        prompt: Optional[str] = None,
+        user_doc: Optional[str] = None,
         **kwargs: Any,
     ) -> None:
-        
         custom_input_type = runnable.InputType
         custom_output_type = runnable.OutputType
         final_chain_name = chain_name or type(runnable).__name__
 
         if isinstance(runnable, RunnableSequence):
-            sub_docs = [runnable.documentation if isinstance(runnable, DocumentedRunnable) else DocumentedRunnable(runnable).documentation for runnable in runnable.steps]
+            sub_docs = [
+                (
+                    runnable.documentation
+                    if isinstance(runnable, DocumentedRunnable)
+                    else DocumentedRunnable(runnable).documentation
+                )
+                for runnable in runnable.steps
+            ]
             sub_docs = [doc for doc in sub_docs if doc]
             if len(sub_docs) >= 2:
                 documentation = RunnableDocumentation(
@@ -109,13 +126,20 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
                     input_type=custom_input_type,
                     output_type=custom_output_type,
                     user_doc=user_doc,
-                    sub_docs=RunnableSequenceDocumentation(docs=sub_docs)
+                    sub_docs=RunnableSequenceDocumentation(docs=sub_docs),
                 )
             else:
                 documentation = sub_docs[0] if len(sub_docs) else None
-        
+
         elif isinstance(runnable, RunnableParallel):
-            sub_docs = [runnable.documentation if isinstance(runnable, DocumentedRunnable) else DocumentedRunnable(runnable).documentation for runnable in runnable.steps.values()]
+            sub_docs = [
+                (
+                    runnable.documentation
+                    if isinstance(runnable, DocumentedRunnable)
+                    else DocumentedRunnable(runnable).documentation
+                )
+                for runnable in runnable.steps.values()
+            ]
             sub_docs = [doc for doc in sub_docs if doc]
             if len(sub_docs) >= 2:
                 documentation = RunnableDocumentation(
@@ -124,7 +148,7 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
                     input_type=custom_input_type,
                     output_type=custom_output_type,
                     user_doc=user_doc,
-                    sub_docs=RunnableParallelDocumentation(docs=sub_docs)
+                    sub_docs=RunnableParallelDocumentation(docs=sub_docs),
                 )
             else:
                 documentation = sub_docs[0] if len(sub_docs) else None
@@ -134,9 +158,13 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
             while isinstance(bound_runnable, RunnableBinding):
                 bound_runnable = bound_runnable.bound
 
-            sub_docs = [bound_runnable.documentation if isinstance(bound_runnable, DocumentedRunnable) else DocumentedRunnable(bound_runnable).documentation]
+            sub_docs = [
+                bound_runnable.documentation
+                if isinstance(bound_runnable, DocumentedRunnable)
+                else DocumentedRunnable(bound_runnable).documentation
+            ]
             sub_docs = [doc for doc in sub_docs if doc]
-            
+
             if final_chain_name == "RunnableBinding":
                 documentation = sub_docs[0] if len(sub_docs) else None
             else:
@@ -146,25 +174,30 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
                     input_type=custom_input_type,
                     output_type=custom_output_type,
                     user_doc=user_doc,
-                    sub_docs=RunnableBindingDocumentation(docs=sub_docs) if len(sub_docs) else None
+                    sub_docs=(
+                        RunnableBindingDocumentation(docs=sub_docs)
+                        if len(sub_docs)
+                        else None
+                    ),
                 )
         else:
             documentation = None
 
         super().__init__(
-            bound=runnable, 
+            bound=runnable,
             documentation=documentation,
             custom_input_type=custom_input_type,
             custom_output_type=custom_output_type,
             **kwargs,
         )
 
+
 def render_io_doc(input, output) -> tuple[str]:
     if isinstance(input, ModelMetaclass):
         input_doc = render_model_doc(input, "Input")
     else:
         input_doc = f"### Input: {input.__name__}"
-    
+
     if isinstance(output, ModelMetaclass):
         output_doc = render_model_doc(output, "Output")
     else:
@@ -179,16 +212,21 @@ def render_model_doc(model: ModelMetaclass, input_or_output: str) -> str:
     tables = {
         cls: tabulate.tabulate(
             [
-                (field.name, field.type, field.required, field.default,)
+                (
+                    field.name,
+                    field.type,
+                    field.required,
+                    field.default,
+                )
                 for field in fields
             ],
             headers=["Name", "Type", "Required", "Default"],
-            tablefmt="github"
+            tablefmt="github",
         )
         for cls, fields in field_info.items()
     }
 
-    return '\n'.join(
+    return "\n".join(
         f"\n### {input_or_output}: {cls}\n\n{table}\n\n"
         for cls, table in tables.items()
     )

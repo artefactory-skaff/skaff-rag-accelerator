@@ -16,7 +16,9 @@ def query(verb: str, url: str, **kwargs):
         st.session_state["authenticated_session"] = None
         st.session_state["email"] = None
         st.session_state["login_status_level"] = "error"
-        st.session_state["login_status_message"] = "Session expired. Please log in again."
+        st.session_state["login_status_message"] = (
+            "Session expired. Please log in again."
+        )
         st.rerun()
 
     return response
@@ -33,6 +35,7 @@ def backend_supports_auth() -> bool:
 def create_session() -> Session:
     session = BaseUrlSession(BACKEND_URL)
     return session
+
 
 class BaseUrlSession(Session):
     def __init__(self, base_url):

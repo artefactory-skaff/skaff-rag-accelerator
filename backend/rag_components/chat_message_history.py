@@ -1,4 +1,3 @@
-
 from datetime import datetime
 
 from langchain_community.chat_message_histories import SQLChatMessageHistory
@@ -22,6 +21,7 @@ def get_chat_message_history(config: RagConfig, chat_id):
         table_name=TABLE_NAME,
         custom_message_converter=TimestampedMessageConverter(TABLE_NAME),
     )
+
 
 class TimestampedMessageConverter(DefaultMessageConverter):
     def __init__(self, table_name: str):

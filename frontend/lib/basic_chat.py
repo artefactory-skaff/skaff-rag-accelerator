@@ -6,7 +6,6 @@ def basic_chat():
 
     with st.container(border=True):
         if user_question:
-
             with st.chat_message("user"):
                 st.write(user_question)
 
