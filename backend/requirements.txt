@@ -17,6 +17,7 @@ uvicorn
 python-multipart
 sse_starlette
 docdantic
+openai
 
 sentence-transformers
 chromadb
