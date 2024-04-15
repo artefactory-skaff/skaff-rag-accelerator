@@ -23,7 +23,7 @@ def browser_tab_title():
 
 def application_header():
     st.image(Image.open(ASSETS_PATH / "logo_title.jpeg"))
-    st.caption("Learn more about the RAG indus kit here: https://artefactory.github.io/skaff-rag-accelerator")
+    st.caption("Learn more about the RAG indus kit here: https://artefactory-skaff.github.io/skaff-rag-accelerator/")
 
 
 if __name__ == "__main__":
@@ -50,7 +50,6 @@ if __name__ == "__main__":
 
     # Once we have an authenticated session, show the chat interface
     if st.session_state.get("authenticated_session") is not None:
-
         # If the backend supports sessions, enable session navigation
         if backend_supports_sessions():
             initialize_state_variable("email", value="demo.user@email.com")  # With authentication, this will take the user's email
