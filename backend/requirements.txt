@@ -16,6 +16,7 @@ sqlglot
 uvicorn
 python-multipart
 sse_starlette
+docdantic
 
 sentence-transformers
 chromadb
