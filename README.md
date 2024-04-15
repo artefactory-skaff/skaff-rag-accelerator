@@ -17,7 +17,7 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 
 ## Quickstart
 
-This quickstart will guide you through the steps to serve the RAG and load a few documents. 
+This quickstart will guide you through the steps to serve the RAG and load a few documents.
 
 You will run both the back and front on your machine.
 
@@ -38,7 +38,7 @@ If you have docker installed and running you can run the whole RAG app using it.
 
 Start the service:
 ```shell
-docker compose up -d
+docker-compose up -d
 ```
 
 Make sure both the front and back are alive:
