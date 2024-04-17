@@ -29,6 +29,7 @@ select = [
   "Q",
   "PTH",
   "PD",
+  "ANN", # annotations
 ] # See: https://beta.ruff.rs/docs/rules/
 ignore = ["D100", "D103", "D203", "D213", "ANN101", "ANN102"]
 line-length = 140
