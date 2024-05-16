@@ -19,7 +19,7 @@ jobs:
       - name: Install requirements
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs mkdocs-techdocs-core pymdown-extensions mkdocs_monorepo_plugin
+          pip install mkdocs pymdown-extensions termynal mkdocs-material
       - name: Deploying MkDocs documentation
         run: |
           mkdocs build
