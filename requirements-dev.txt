@@ -5,3 +5,5 @@ mkdocs_monorepo_plugin
 pymdown-extensions
 mkdocs-pymdownx-material-extras
 mkdocs-techdocs-core
+termynal 
+mkdocs-material
