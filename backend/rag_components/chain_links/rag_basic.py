@@ -28,7 +28,7 @@ def rag_basic(llm, retriever: BaseRetriever) -> DocumentedRunnable:
     chain = (
         {
             "relevant_documents": fetch_docs_chain(retriever),
-            "question": RunnablePassthrough(Question),
+            "question": RunnablePassthrough(input_type=Question),
         }
         | ChatPromptTemplate.from_template(prompt)
         | llm
