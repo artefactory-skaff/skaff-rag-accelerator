@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from langserve import add_routes
 
-from backend.api_plugins import authentication_routes, session_routes
+# from backend.api_plugins import authentication_routes, session_routes
 from backend.rag_components.rag import RAG
 
 # Initialize a RAG as discribed in the config.yaml file

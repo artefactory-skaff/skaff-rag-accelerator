@@ -26,7 +26,8 @@ class Database:
         url (URL): The parsed URL object of the connection string.
         pool (PooledDB): The connection pool for database connections.
         conn (Connection): The current database connection.
-        DIALECT_PLACEHOLDERS (dict): Mapping of database dialects to their placeholder symbols.
+        DIALECT_PLACEHOLDERS (dict): Mapping of database dialects to their placeholder
+            symbols.
     """
 
     DIALECT_PLACEHOLDERS = {
@@ -52,10 +53,17 @@ class Database:
         self.conn = self.pool.connection()
         return self
 
-    def __exit__(self, exc_type: Optional[type], exc_value: Optional[BaseException], traceback: Optional[Any]) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[type],
+        exc_value: Optional[BaseException],
+        traceback: Optional[Any],
+    ) -> None:
         if self.conn:
             if exc_type:
-                self.logger.error("Transaction failed", exc_info=(exc_type, exc_value, traceback))
+                self.logger.error(
+                    "Transaction failed", exc_info=(exc_type, exc_value, traceback)
+                )
                 self.conn.rollback()
             else:
                 self.conn.commit()
@@ -93,10 +101,16 @@ class Database:
         try:
             self.logger.debug("Initializing database schema")
             sql_script = Path(__file__).parent.joinpath("db_init.sql").read_text()
-            transpiled_sql = sqlglot.transpile(sql_script, read="sqlite", write=self.url.drivername.replace("postgresql", "postgres"))
+            transpiled_sql = sqlglot.transpile(
+                sql_script,
+                read="sqlite",
+                write=self.url.drivername.replace("postgresql", "postgres"),
+            )
             for statement in transpiled_sql:
                 self.execute(statement)
-            self.logger.info(f"Database schema initialized successfully for {self.url.drivername}")
+            self.logger.info(
+                f"Database schema initialized successfully for {self.url.drivername}"
+            )
         except Exception as e:
             self.logger.exception("Schema initialization failed", exc_info=e)
             raise
@@ -105,33 +119,46 @@ class Database:
         try:
             self.logger.debug(f"Running Database script at {str(path)}")
             sql_script = path.read_text()
-            transpiled_sql = sqlglot.transpile(sql_script, read="sqlite", write=self.url.drivername.replace("postgresql", "postgres"))
+            transpiled_sql = sqlglot.transpile(
+                sql_script,
+                read="sqlite",
+                write=self.url.drivername.replace("postgresql", "postgres"),
+            )
             for statement in transpiled_sql:
                 self.execute(statement)
-            self.logger.info(f"Successfuly ran script at {path} for {self.url.drivername}")
+            self.logger.info(
+                f"Successfuly ran script at {path} for {self.url.drivername}"
+            )
         except Exception as e:
-            self.logger.exception(f"Failed to execute the script {path} for {self.url.drivername}", exc_info=e)
+            self.logger.exception(
+                f"Failed to execute the script {path} for {self.url.drivername}",
+                exc_info=e,
+            )
             raise
 
     def _create_pool(self) -> PooledDB:
         if self.connection_string.startswith("sqlite:///"):
             import sqlite3
-            Path(self.connection_string.replace("sqlite:///", "")).parent.mkdir(parents=True, exist_ok=True)
+
+            Path(self.connection_string.replace("sqlite:///", "")).parent.mkdir(
+                parents=True, exist_ok=True
+            )
             return PooledDB(
                 creator=sqlite3,
                 database=self.connection_string.replace("sqlite:///", ""),
-                maxconnections=5
+                maxconnections=5,
             )
         elif self.connection_string.startswith("postgresql://"):
             import psycopg2
+
             return PooledDB(
-                creator=psycopg2,
-                dsn=self.connection_string,
-                maxconnections=5
+                creator=psycopg2, dsn=self.connection_string, maxconnections=5
             )
-        elif self.connection_string.startswith("mysql://") or \
-             self.connection_string.startswith("mysql+pymysql://"):
+        elif self.connection_string.startswith(
+            "mysql://"
+        ) or self.connection_string.startswith("mysql+pymysql://"):
             import mysql.connector
+
             return PooledDB(
                 creator=mysql.connector,
                 user=self.url.username,
@@ -139,14 +166,15 @@ class Database:
                 host=self.url.host,
                 port=self.url.port,
                 database=self.url.database,
-                maxconnections=5
+                maxconnections=5,
             )
         elif self.connection_string.startswith("sqlserver://"):
             import pyodbc
+
             return PooledDB(
                 creator=pyodbc,
                 dsn=self.connection_string.replace("sqlserver://", ""),
-                maxconnections=5
+                maxconnections=5,
             )
         else:
             raise ValueError(f"Unsupported database type: {self.url.drivername}")

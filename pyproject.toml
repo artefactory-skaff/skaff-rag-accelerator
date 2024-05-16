@@ -20,63 +20,23 @@ requires-python = ">=3.8"
 packages = ["lib", "config", "tests"]
 
 [tool.ruff]
-select = [
-  "E",
-  "W",
-  "F",
-  "I",
-  "N",
-  "Q",
-  "PTH",
-  "PD",
-] # See: https://beta.ruff.rs/docs/rules/
-ignore = ["D100", "D103", "D203", "D213", "ANN101", "ANN102"]
-line-length = 140
 target-version = "py310"
-exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "venv",
-]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint]
+select = [
+  "E", # pycodestyle
+  "W", # pycodestyle
+  "F", # Pyflakes
+  "I", # isort
+  "N", # pep8-naming
+  "Q", # flake8-quotes
+  "PTH", # flake8-use-pathlib
+  "PD", # pandas-vet
+] # See: https://docs.astral.sh/ruff/rules/
+ignore = ["D100", "D103", "D203", "D213", "ANN101", "ANN102"]
+
+[tool.ruff.lint.pydocstyle]
 convention = "google"
-
-# https://black.readthedocs.io/en/stable/usage_and_configuration/the_basics.html
-[tool.black]
-line-length = 100
-target-version = ["py310"]
-include = '\.pyi?$'
-exclude = '''
-(
-  /(
-      \.direnv
-    | \.eggs
-    | \.git
-    | \.tox
-    | \.venv
-    | _build
-    | build
-    | dist
-    | venv
-  )/
-)
-'''
-
-[tool.isort]
-profile = "black"
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests"]

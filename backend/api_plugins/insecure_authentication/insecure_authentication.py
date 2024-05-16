@@ -25,10 +25,12 @@ def insecure_authentication_routes(app):
     async def signup(email: str) -> dict:
         user = User(email=email)
         if user_exists(user.email):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"User {user.email} already registered")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User {user.email} already registered",
+            )
         create_user(user)
         return {"email": user.email}
-
 
     @app.delete("/user/")
     async def del_user(current_user: User = Depends(get_current_user)) -> dict:
@@ -36,12 +38,17 @@ def insecure_authentication_routes(app):
         try:
             user = get_user(email)
             if user is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {email} not found")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"User {email} not found",
+                )
             delete_user(email)
             return {"detail": f"User {email} deleted"}
         except Exception:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal Server Error",
+            )
 
     @app.post("/user/login")
     async def login(email: str) -> dict:
@@ -51,16 +58,20 @@ def insecure_authentication_routes(app):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username",
             )
-        return {"access_token": email, "token_type": "bearer"}  # Fake bearer token to still provide user authentication
-
+        return {
+            "access_token": email,
+            "token_type": "bearer",
+        }  # Fake bearer token to still provide user authentication
 
     @app.get("/user/me")
     async def user_me(current_user: User = Depends(get_current_user)) -> User:
         return current_user
 
-
     @app.get("/user")
     async def user_root() -> dict:
-        return Response("Insecure user management routes are enabled. Do not use in prod.", status_code=200)
+        return Response(
+            "Insecure user management routes are enabled. Do not use in prod.",
+            status_code=200,
+        )
 
     return Depends(get_current_user)

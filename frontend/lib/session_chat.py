@@ -17,7 +17,10 @@ class Message:
 
     def __post_init__(self):
         self.id = str(uuid4()) if self.id is None else self.id
-        self.timestamp = datetime.utcnow().isoformat() if self.timestamp is None else self.timestamp
+        self.timestamp = (
+            datetime.utcnow().isoformat() if self.timestamp is None else self.timestamp
+        )
+
 
 def session_chat():
     user_question = st.chat_input("Say something")
@@ -40,7 +43,10 @@ def session_chat():
             st.session_state["messages"].append(user_message)
 
             chain = st.session_state.get("chain")
-            response = chain.stream({"question": user_question}, {"configurable": {"session_id": session_id}})
+            response = chain.stream(
+                {"question": user_question},
+                {"configurable": {"session_id": session_id}},
+            )
 
             with st.chat_message("assistant"):
                 full_response = ""
@@ -59,6 +65,7 @@ def new_session():
     st.session_state["session_id"] = session_id
     st.session_state["messages"] = []
     return session_id
+
 
 def get_session(session_id: str):
     session = query("get", f"/session/{session_id}").json()

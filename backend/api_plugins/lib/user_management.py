@@ -13,6 +13,7 @@ class UnsecureUser(BaseModel):
     email: str = None
     password: bytes = None
 
+
 class User(BaseModel):
     email: str = None
     hashed_password: str = None
@@ -26,7 +27,8 @@ class User(BaseModel):
 def create_user(user: User) -> None:
     with Database() as connection:
         connection.execute(
-            "INSERT INTO users (email, password) VALUES (?, ?)", (user.email, user.hashed_password)
+            "INSERT INTO users (email, password) VALUES (?, ?)",
+            (user.email, user.hashed_password),
         )
 
 
@@ -54,12 +56,17 @@ def authenticate_user(username: str, password: bytes) -> bool | User:
     if not user:
         return False
 
-    if argon2.verify_password(user.hashed_password.encode("utf-8"), password.encode("utf-8")):
+    if argon2.verify_password(
+        user.hashed_password.encode("utf-8"), password.encode("utf-8")
+    ):
         return user
 
     return False
 
-def create_access_token(*, data: dict, expires_delta: Optional[timedelta] = None) -> str:
+
+def create_access_token(
+    *, data: dict, expires_delta: Optional[timedelta] = None
+) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta

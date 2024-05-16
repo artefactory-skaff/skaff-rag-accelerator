@@ -4,6 +4,7 @@ from logging import Logger
 # Implement your custom logging logic here. Eg. send logs to a cloud's logging tool.
 _logger_instance = None
 
+
 def get_logger() -> Logger:
     global _logger_instance
     if _logger_instance is None:

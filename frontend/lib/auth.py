@@ -13,7 +13,9 @@ from frontend.lib.backend_interface import create_session
 def authentication_page():
     auth_form_tabs = [stx.TabBarItemData(id="Login", title="Login", description="")]
     if ADMIN_MODE:
-        auth_form_tabs += [stx.TabBarItemData(id="Signup", title="Signup", description="")]
+        auth_form_tabs += [
+            stx.TabBarItemData(id="Signup", title="Signup", description="")
+        ]
 
     tab = stx.tab_bar(data=auth_form_tabs, default="Login")
     if tab == "Login":
@@ -27,8 +29,11 @@ def login_form():
         username = st.text_input("Username", key="username")
         password = st.text_input("Password", type="password")
         if st.session_state["login_status_message"]:
-            # Dynamically decides whether to call st.error, st.success, or any other Streamlit method
-            getattr(st, st.session_state["login_status_level"])(st.session_state["login_status_message"])
+            # Dynamically decides whether to call st.error, st.success, or any other
+            # Streamlit method
+            getattr(st, st.session_state["login_status_level"])(
+                st.session_state["login_status_message"]
+            )
         submit = st.form_submit_button("Log in")
 
         if submit:
@@ -39,7 +44,9 @@ def login_form():
                 session = authenticate_session(session, token)
             else:
                 st.session_state["login_status_level"] = "error"
-                st.session_state["login_status_message"] = "Username/password combination not found"
+                st.session_state["login_status_message"] = (
+                    "Username/password combination not found"
+                )
             st.session_state["authenticated_session"] = session
             st.session_state["email"] = username
             st.rerun()
@@ -50,7 +57,9 @@ def signup_form():
         username = st.text_input("Username", key="username")
         password = st.text_input("Password", type="password")
         if st.session_state["login_status_message"]:
-            getattr(st, st.session_state["login_status_level"])(st.session_state["login_status_message"])
+            getattr(st, st.session_state["login_status_level"])(
+                st.session_state["login_status_message"]
+            )
         submit = st.form_submit_button("Sign up")
 
         if submit:
@@ -63,7 +72,9 @@ def signup_form():
                 st.session_state["login_status_level"] = "success"
                 st.session_state["login_status_message"] = "Success! Account created."
                 if st.session_state["login_status_message"]:
-                    getattr(st, st.session_state["login_status_level"])(st.session_state["login_status_message"])
+                    getattr(st, st.session_state["login_status_level"])(
+                        st.session_state["login_status_message"]
+                    )
                 sleep(1.5)
             else:
                 st.session_state["login_status_level"] = "error"
@@ -75,7 +86,9 @@ def signup_form():
 
 def get_token(username: str, password: str) -> Optional[str]:
     session = create_session()
-    response = session.post("/user/login", data={"username": username, "password": password})
+    response = session.post(
+        "/user/login", data={"username": username, "password": password}
+    )
     if response.status_code == 200 and "access_token" in response.json():
         return response.json()["access_token"]
     else:
@@ -84,7 +97,9 @@ def get_token(username: str, password: str) -> Optional[str]:
 
 def sign_up(username: str, password: str) -> bool:
     session = create_session()
-    response = session.post("/user/signup", json={"email": username, "password": password})
+    response = session.post(
+        "/user/signup", json={"email": username, "password": password}
+    )
     if response.status_code == 200 and "email" in response.json():
         return True
     else:
@@ -93,5 +108,7 @@ def sign_up(username: str, password: str) -> bool:
 
 def authenticate_session(session, bearer_token: str) -> requests.Session:
     session.headers.update({"Authorization": f"Bearer {bearer_token}"})
-    st.session_state["chain"] = RemoteRunnable(BACKEND_URL, headers={"Authorization": f"Bearer {bearer_token}"})
+    st.session_state["chain"] = RemoteRunnable(
+        BACKEND_URL, headers={"Authorization": f"Bearer {bearer_token}"}
+    )
     return session
