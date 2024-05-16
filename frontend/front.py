@@ -23,37 +23,53 @@ def browser_tab_title():
 
 def application_header():
     st.image(Image.open(ASSETS_PATH / "logo_title.jpeg"))
-    st.caption("Learn more about the RAG indus kit here: https://artefactory.github.io/skaff-rag-accelerator")
+    st.caption(
+      "Learn more about the RAG indus kit here:" 
+      " https://artefactory-skaff.github.io/skaff-rag-accelerator/"
+    )
 
 
 if __name__ == "__main__":
     browser_tab_title()
     application_header()
 
-    # The session is used to make requests to the backend. It helps with the handling of cookies, auth, and other session data
+    # The session is used to make requests to the backend. It helps with the handling of
+    # cookies, auth, and other session data
     initialize_state_variable("session", value=create_session())
 
     # The chain is our RAG that will be used to answer questions.
-    # Langserve's RemoteRunnable allows us to work as if the RAG was local, but it's actually running on the backend
+    # Langserve's RemoteRunnable allows us to work as if the RAG was local, but it's
+    # actually running on the backend
     initialize_state_variable("chain", value=RemoteRunnable(BACKEND_URL))
 
-    # If the backend supports authentication but the user is not authenticated, show the authentication page
-    if backend_supports_auth() and st.session_state.get("authenticated_session", None) is None:
+    # If the backend supports authentication but the user is not authenticated, show the
+    # authentication page
+    if (
+        backend_supports_auth()
+        and st.session_state.get("authenticated_session", None) is None
+    ):
         initialize_state_variable("login_status_message", value="")
         initialize_state_variable("login_status_level", value="info")
         authentication_page()
-        st.stop()  # Stop the script to avoid running the rest of the code if the user is not authenticated
+        # Stop the script to avoid running the rest of the code if the user is not
+        # authenticated
+        st.stop()
 
-    # If the backend does not support authentication, just use the session as the authenticated session
-    if not backend_supports_auth() and st.session_state.get("authenticated_session", None) is None:
+    # If the backend does not support authentication, just use the session as the
+    # authenticated session
+    if (
+        not backend_supports_auth()
+        and st.session_state.get("authenticated_session", None) is None
+    ):
         st.session_state["authenticated_session"] = st.session_state["session"]
 
     # Once we have an authenticated session, show the chat interface
     if st.session_state.get("authenticated_session") is not None:
-
         # If the backend supports sessions, enable session navigation
         if backend_supports_sessions():
-            initialize_state_variable("email", value="demo.user@email.com")  # With authentication, this will take the user's email
+            initialize_state_variable(
+                "email", value="demo.user@email.com"
+            )  # With authentication, this will take the user's email
             sidebar()
             session_chat()
         else:

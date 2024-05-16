@@ -7,7 +7,7 @@ name: GenAI RAG indus kit
 owner: alexis.vialaret@artefact.com
 description: >
   Deploy production grade RAGs quickly, on any cloud.
-documentation_url: https://artefactory.github.io/skaff-rag-accelerator/
+documentation_url: https://artefactory-skaff.github.io/skaff-rag-accelerator/
 
 type: deployable   # deployable, knowldege pack
 lifecycle: prototype  # prototype, production

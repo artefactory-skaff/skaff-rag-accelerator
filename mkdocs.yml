@@ -2,24 +2,87 @@ site_name: GenAI RAG Accelerator
 repo_name: artefactory/skaff-rag-accelerator
 repo_url: https://github.com/artefactory/skaff-rag-accelerator
 
+theme:
+  name: material
+  logo: images/logo.svg
+  favicon: images/favicon.svg
+  font: 
+    text: Oxygen
+  features:
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - navigation.indexes
+    - navigation.path
+    - navigation.instant
+    - navigation.instant.preview
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tracking
+    - toc.follow
+  palette:  # Light and dark mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/lightbulb-outline
+        name: "Switch to dark mode"
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/lightbulb
+        name: "Switch to light mode"
+
+extra:
+  # hide the "Made with Material for MkDocs" message
+  generator: false
+  analytics:
+    provider: google
+    property: G-7REH78BCSD
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/thumb-up-outline
+          name: This page was helpful
+          data: 1@
+          note: >-
+            Thanks for your feedback!
+        - icon: material/thumb-down-outline
+          name: This page could be improved
+          data: 0
+          note: >- 
+            Thanks for your feedback! Help us improve this page by 
+            <a href="https://github.com/artefactory-skaff/skaff-rag-accelerator/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">opening an issue</a>.
+
+extra_css:
+  - stylesheets/skaff.css
+
 plugins:
-  - techdocs-core
+  - termynal
+  - search
 
 markdown_extensions:
   - admonition
   - attr_list
   - md_in_html
   - pymdownx.superfences
-  - pymdownx.tabbed
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.tasklist
   - pymdownx.snippets
+
 
 nav:
   - Home: index.md
   - The frontend: frontend.md
   - The database: database.md
   - The backend:
-    - The backend: backend/backend.md
+    - The Backend: backend/backend.md
     - RAG and RAGConfig classes: backend/rag_ragconfig.md
     - Chains and chain links: backend/chains/chains.md
     - API Plugins:

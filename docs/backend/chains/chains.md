@@ -7,7 +7,7 @@ We provide two basic RAG chains to get you started, one does simple one-shot Q&A
 
 ## Chains and chain links
 
-This repo does not define large monolithic chains. To make it easier to pick and chose the required functionalities, we provide "chain links" at `backend/rag_components/chain_links`. All links are valid, self-sufficient chains. You can think of it as a toolbox of langchain components meant to be composed and stacked together to build actually useful chains. 
+This repo does not define large monolithic chains. To make it easier to pick and chose the required functionalities, we provide "chain links" at `backend/rag_components/chain_links`. All links are valid, self-sufficient chains. You can think of it as a toolbox of langchain components meant to be composed and stacked together to build actually useful chains.
 
 As all links are `Runnable` objects, they can be built from other chain links which are themselves made of chain links, etc...
 
@@ -21,7 +21,7 @@ Typically, a link has:
 - A chain definition
 
 
-For example the `condense_question` chain link has `QuestionWithChatHistory` and `StandaloneQuestion` as input an output models. 
+For example the `condense_question` chain link has `QuestionWithChatHistory` and `StandaloneQuestion` as input an output models.
 ```python
 class QuestionWithChatHistory(BaseModel):
     question: str
@@ -69,9 +69,9 @@ Documentation is recursively generated from all the `DocumentedRunnable` chains 
 In order to document your chain, just wrap it in a `DocumentedRunnable`:
 ```python
 documented_chain = DocumentedRunnable(
-    runnable=my_chain, 
-    chain_name="My documented Chain", 
-    user_doc="Additional chain explainations that will be displayed in the markdown", 
+    runnable=my_chain,
+    chain_name="My documented Chain",
+    user_doc="Additional chain explainations that will be displayed in the markdown",
     prompt=prompt,
 )
 ```

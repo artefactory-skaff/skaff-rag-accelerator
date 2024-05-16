@@ -5,7 +5,7 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 
 ## Features
 
-- A configurable RAG setup based around Langchain ([Check out the configuration cookbook here](https://artefactory.github.io/skaff-rag-accelerator/cookbook/))
+- A configurable RAG setup based around Langchain ([Check out the configuration cookbook here](https://artefactory-skaff.github.io/skaff-rag-accelerator/cookbook/))
 - `RAG` and `RagConfig` python classes that manage components (vector store, llm, retreiver, ...)
 - A REST API based on Langserve + FastAPI to provide easy access to the RAG as a web backend
 - Optional API plugins for secure user authentication, session management, ...
@@ -17,7 +17,7 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 
 ## Quickstart
 
-This quickstart will guide you through the steps to serve the RAG and load a few documents. 
+This quickstart will guide you through the steps to serve the RAG and load a few documents.
 
 You will run both the back and front on your machine.
 
@@ -80,7 +80,7 @@ Right now the RAG does not have any documents loaded, you can use the notebook i
 
 To deep dive into under the hood, take a look at the documentation
 
-[On github pages](https://artefactory.github.io/skaff-rag-accelerator/)
+[On github pages](https://artefactory-skaff.github.io/skaff-rag-accelerator/)
 
 Or serve them locally:
 ```shell

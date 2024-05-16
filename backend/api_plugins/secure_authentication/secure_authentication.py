@@ -22,6 +22,7 @@ from backend.api_plugins.lib.user_management import (
 
 def authentication_routes(app, dependencies=List[Depends]):
     from backend.database import Database
+
     with Database() as connection:
         connection.run_script(Path(__file__).parent / "users_tables.sql")
 
@@ -46,21 +47,22 @@ def authentication_routes(app, dependencies=List[Depends]):
         except JWTError:
             raise credentials_exception
 
-
     @app.post("/user/signup", include_in_schema=ADMIN_MODE)
     async def signup(user: UnsecureUser) -> dict:
         if not ADMIN_MODE:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Signup is disabled")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Signup is disabled"
+            )
 
         user = User.from_unsecure_user(user)
         if user_exists(user.email):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"User {user.email} already registered"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"User {user.email} already registered",
             )
 
         create_user(user)
         return {"email": user.email}
-
 
     @app.delete("/user/")
     async def del_user(current_user: User = Depends(get_current_user)) -> dict:
@@ -69,15 +71,16 @@ def authentication_routes(app, dependencies=List[Depends]):
             user = get_user(email)
             if user is None:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail=f"User {email} not found"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"User {email} not found",
                 )
             delete_user(email)
             return {"detail": f"User {email} deleted"}
         except Exception:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error"
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal Server Error",
             )
-
 
     @app.post("/user/login")
     async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> dict:
@@ -93,15 +96,12 @@ def authentication_routes(app, dependencies=List[Depends]):
         access_token = create_access_token(data=user_data)
         return {"access_token": access_token, "token_type": "bearer"}
 
-
     @app.get("/user/me")
     async def user_me(current_user: User = Depends(get_current_user)) -> User:
         return current_user
 
-
     @app.get("/user")
     async def user_root() -> dict:
         return Response("User management routes are enabled.", status_code=200)
-
 
     return Depends(get_current_user)

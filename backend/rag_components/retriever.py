@@ -1,6 +1,4 @@
 from langchain_core.vectorstores import VectorStore
-from langchain import retrievers as base_retrievers
-from langchain_community import retrievers as community_retrievers
 
 
 def get_retriever(vector_store: VectorStore):
