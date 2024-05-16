@@ -13,8 +13,8 @@ readme = "README.md"
 requires-python = ">=3.8"
 
 [project.urls]
-"Homepage" = "https://github.com/artefactory-fr/rag-as-a-service"
-"Documentation" = "https://artefactory-fr.github.io/rag-as-a-service"
+"Homepage" = "https://github.com/artefactory-skaff/skaff-rag-accelerator"
+"Documentation" = "https://artefactory-skaff.github.io/skaff-rag-accelerator/"
 
 [tool.setuptools]
 packages = ["lib", "config", "tests"]
