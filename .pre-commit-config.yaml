@@ -7,22 +7,17 @@ repos:
       - id: check-toml
       - id: check-json
       - id: check-added-large-files
-  - repo: local
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.1
     hooks:
-      - id: isort
-        name: Sorting imports (isort)
-        entry: isort
-        types: [python]
-        language: system
       - id: ruff
-        name: Linting (ruff)
-        entry: ruff --fix
-        types: [python]
-        language: system
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.7.1
+    hooks:
       - id: nbstripout
-        name: Strip Jupyter notebook output (nbstripout)
-        entry: nbstripout
-        types: [file]
-        files: (.ipynb)$
-        language: system
+
 exclude: ^(.svn|CVS|.bzr|.hg|.git|__pycache__|.tox|.ipynb_checkpoints|assets|tests/assets/|venv/|.venv/)

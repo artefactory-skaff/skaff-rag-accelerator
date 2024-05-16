@@ -12,8 +12,10 @@ class Message(BaseModel):
     sender: str
     content: str
 
+
 class Input(BaseModel):
     question: str
+
 
 class InvokeRequest(BaseModel):
     input: Input | List[Input]  # Supports batched input
@@ -21,7 +23,10 @@ class InvokeRequest(BaseModel):
     session_id: str = None
     config: dict = Field(default_factory=dict)
     kwargs: dict = Field(default_factory=dict)
-    timestamp: str | datetime = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str | datetime = Field(
+        default_factory=lambda: datetime.utcnow().isoformat()
+    )
+
 
 class UserMessage(InvokeRequest):
     sender: str = "user"
