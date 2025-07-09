@@ -6,7 +6,7 @@ from langchain.docstore.document import Document
 from langchain.indexes import SQLRecordManager, index
 from langchain.schema.embeddings import Embeddings
 from langchain.vectorstores import VectorStore
-from langchain.vectorstores.utils import filter_complex_metadata
+from langchain_community.vectorstores.utils import filter_complex_metadata
 from langchain_core.retrievers import BaseRetriever
 
 from backend.config import RagConfig

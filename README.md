@@ -28,7 +28,7 @@ Duration: ~15 minutes.
 
 ### Pre-requisites
 
-- An `OPENAI_API_KEY` for the Artefact GPT-4 deployment on Azure. Contact alexis.vialaret@artefact.com if you do not have one.
+- An `AZURE_OPENAI_API_KEY` for the Artefact GPT-4 deployment on Azure. Reach out to the repo contributors if you do not have one.
 - A few GB of disk space
 - Tested with python 3.11 (may work with other versions)
 

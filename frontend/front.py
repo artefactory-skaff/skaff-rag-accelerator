@@ -24,8 +24,8 @@ def browser_tab_title():
 def application_header():
     st.image(Image.open(ASSETS_PATH / "logo_title.jpeg"))
     st.caption(
-      "Learn more about the RAG indus kit here:" 
-      " https://artefactory-skaff.github.io/skaff-rag-accelerator/"
+        "Learn more about the RAG indus kit here:"
+        " https://artefactory-skaff.github.io/skaff-rag-accelerator/"
     )
 
 
