@@ -1,6 +1,5 @@
 # skaff-rag-accelerator
 
-
 This is a starter kit to deploy a modularizable RAG locally or on the cloud (or across multiple clouds)
 
 ## Features
@@ -14,7 +13,6 @@ This is a starter kit to deploy a modularizable RAG locally or on the cloud (or 
 - `Dockerfiles` and `docker-compose` to make deployments easier and more flexible
 - A document loader for the RAG
 
-
 ## Quickstart
 
 This quickstart will guide you through the steps to serve the RAG and load a few documents.
@@ -23,28 +21,30 @@ You will run both the back and front on your machine.
 
 For this exemple, we will be using GPT4, the `BAAI/bge-base-en-v1.5` embedding model, and Chroma for the vector store.
 
-
 Duration: ~15 minutes.
 
 ### Pre-requisites
 
-- An `AZURE_OPENAI_API_KEY` for the Artefact GPT-4 deployment on Azure. Reach out to the repo contributors if you do not have one.
+- An `OPENAI_API_KEY` for the Artefact GPT-4 deployment on Azure. Reach out to the repo contributors if you do not have one.
 - A few GB of disk space
 - Tested with python 3.11 (may work with other versions)
 
 ### Run using docker compose
 
-If you have docker installed and running you can run the whole RAG app using it. [Otherwise, skip to the "Run directly" section](#run-directly)
+If you have docker installed and running you can run the whole RAG app using it. [Otherwise, skip to the &#34;Run directly&#34; section](#run-directly)
 
 Start the service:
+
 ```shell
 docker compose up -d
 ```
 
 Make sure both the front and back are alive:
+
 ```shell
 docker ps
 ```
+
 You should see two containers with status `Up X minutes`.
 
 Go to http://localhost:9000/ to query your RAG.
@@ -52,22 +52,26 @@ Go to http://localhost:9000/ to query your RAG.
 ### Run directly
 
 In a fresh env:
+
 ```shell
 pip install -r requirements-dev.txt
 ```
 
 You will need to set some env vars, either in a .env file at the project root, or just by exporting them like so:
+
 ```shell
 export PYTHONPATH=.
 export ADMIN_MODE=1
 ```
 
 Start the backend server locally:
+
 ```shell
 python -m uvicorn backend.main:app
 ```
 
 Start the frontend demo
+
 ```shell
 python -m streamlit run frontend/front.py
 ```
@@ -83,11 +87,12 @@ To deep dive into under the hood, take a look at the documentation
 [On github pages](https://artefactory-skaff.github.io/skaff-rag-accelerator/)
 
 Or serve them locally:
+
 ```shell
 mkdocs serve
 ```
-Then go to http://localhost:8000/
 
+Then go to http://localhost:8000/
 
 ## Architecture
 
