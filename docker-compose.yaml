@@ -12,6 +12,7 @@ services:
       - ADMIN_MODE=1
       - PYTHONPATH=.
       - DATABASE_URL=sqlite:///database/rag.sqlite3
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./database:/app/database
     networks:

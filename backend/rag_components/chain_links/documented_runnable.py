@@ -138,7 +138,7 @@ class DocumentedRunnable(RunnableBindingBase[Input, Output]):
                     if isinstance(runnable, DocumentedRunnable)
                     else DocumentedRunnable(runnable).documentation
                 )
-                for runnable in runnable.steps.values()
+                for runnable in runnable.steps__.values()
             ]
             sub_docs = [doc for doc in sub_docs if doc]
             if len(sub_docs) >= 2:

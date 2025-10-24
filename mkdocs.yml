@@ -6,7 +6,7 @@ theme:
   name: material
   logo: images/logo.svg
   favicon: images/favicon.svg
-  font: 
+  font:
     text: Oxygen
   features:
     - search.suggest
@@ -55,8 +55,8 @@ extra:
         - icon: material/thumb-down-outline
           name: This page could be improved
           data: 0
-          note: >- 
-            Thanks for your feedback! Help us improve this page by 
+          note: >-
+            Thanks for your feedback! Help us improve this page by
             <a href="https://github.com/artefactory-skaff/skaff-rag-accelerator/issues/new/?title=[Feedback]+{title}+-+{url}" target="_blank" rel="noopener">opening an issue</a>.
 
 extra_css:

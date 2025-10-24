@@ -1,9 +1,9 @@
 /* https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#custom-colors */
 :root {
     --md-primary-fg-color: #142146;
-    --md-accent-fg-color: #fc2c7f;  
+    --md-accent-fg-color: #fc2c7f;
 }
-  
+
   /* Revert hue value to that of pre mkdocs-material v9.4.0 */
   [data-md-color-scheme="slate"] {
     /* Hue taken from hsl of #142146, used for bg on website*/
@@ -37,14 +37,14 @@
     --md-code-hl-comment-color:          #666666;
     --md-code-hl-variable-color:         var(--md-code-fg-color);
   }
-  
+
   .custom-source-wrapper {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
   }
-  
+
   @media screen and (min-width: 60em) {
       .md-header__source {
           box-sizing: content-box;
@@ -52,7 +52,7 @@
           width: 11.7rem;
       }
   }
-  
+
   .custom-login-button {
     font-size: 0.8rem;
     font-weight: 700;
@@ -62,11 +62,11 @@
     padding: 6px 12px;
     transition: opacity .25s;
   }
-  
+
   .custom-login-button:hover {
     opacity: 0.7
   }
-  
+
   /* Hide all ToC entries for parameters. */
   li.md-nav__item>a[href*="("] {
     display: none;

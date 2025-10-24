@@ -5,8 +5,8 @@ from pathlib import Path
 import yaml
 from dotenv import load_dotenv
 from jinja2 import Template
-from langchain.schema.embeddings import Embeddings
 from langchain.vectorstores import VectorStore
+from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import LLM
 from langchain_core.language_models.chat_models import BaseChatModel
 
@@ -23,7 +23,6 @@ class LLMConfig:
 class VectorStoreConfig:
     source: VectorStore | str
     source_config: dict
-
     insertion_mode: str  # "None", "full", "incremental"
 
 
